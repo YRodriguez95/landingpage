@@ -26,6 +26,10 @@ html, body {
   color: var(--text);
 }
 
+body {
+  overflow-x: hidden;
+}
+
 /* ══════════════════════════════════════════
    LOADER
 ══════════════════════════════════════════ */
@@ -211,30 +215,34 @@ html, body {
 
 .main-content {
   position: relative; z-index: 2;
-  text-align: center; padding: 40px;
+  width: min(1200px, 100%);
+  text-align: center;
+  padding: 120px 40px 40px;
 }
 .main-title {
   font-family: 'Special Elite', cursive;
-  font-size: clamp(36px, 1vw, 80px);
+  font-size: clamp(2.1rem, 4vw, 5rem);
   color: #c4b89a;
   letter-spacing: 0.2em;
-  margin: 35px;
+  margin: 35px 0;
   text-transform: uppercase;
   text-shadow: 0 0 60px #4a7c5944;
   animation: titleReveal 1.5s 0.3s both;
 }
 .main-subtitle {
-  
   color: var(--green-spore);
   text-transform: uppercase;
+  letter-spacing: 0.14em;
+  line-height: 1.6;
   animation: titleReveal 1.5s 0.6s both;
 }
 .main-sub {
   color: var(--green-spore);
   text-transform: uppercase;
+  letter-spacing: 0.12em;
+  line-height: 1.8;
   animation: titleReveal 1.5s 0.6s both;
-  margin:50px;
-  
+  margin: 50px 0;
 }
 .main-divider {
   width: 200px; height: 1px;
@@ -244,9 +252,17 @@ html, body {
 }
 .main-body {
   font-size: 14px; line-height: 2;
-  color: #c0e3c7; max-width: 350%;
+  color: #c0e3c7;
+  max-width: 100%;
   animation: titleReveal 1.5s 1.2s both;
   margin-bottom: 25px;
+}
+
+.character-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(28px, 5vw, 120px);
+  align-items: stretch;
 }
 .main-intro {
   width: min(980px, calc(100vw - 48px));
@@ -443,6 +459,8 @@ nav {
   display: flex;
   gap: 40px;
   list-style: none;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .nav-links a {
@@ -522,6 +540,10 @@ nav {
   font-size: 11px;
   color: #7a8f7e;
   margin: 0;
+}
+
+.character-grid > * {
+  min-width: 0;
 }
 
 /* ══════════════════════════════════════════
@@ -697,6 +719,23 @@ nav {
 }
 
 @media (max-width: 900px) {
+  .main-content {
+    padding: 110px 28px 36px;
+  }
+
+  .main-title {
+    letter-spacing: 0.16em;
+  }
+
+  nav {
+    padding: 16px 28px;
+    gap: 18px;
+  }
+
+  .nav-links {
+    gap: 18px 24px;
+  }
+
   .race-card {
     flex-direction: column;
   }
@@ -1637,6 +1676,192 @@ body.locked-screen nav {
 
   .scene-heading {
     text-align: center;
+  }
+}
+
+@media (max-width: 700px) {
+  .loader-content {
+    gap: 20px;
+    padding: 0 16px;
+  }
+
+  .warning-band {
+    width: calc(100% - 24px);
+    bottom: 18px;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    white-space: normal;
+    text-align: center;
+    justify-content: center;
+  }
+
+  #mainPage {
+    align-items: flex-start;
+  }
+
+  .main-content {
+    padding: 104px 16px 28px;
+  }
+
+  .main-title {
+    font-size: clamp(1.8rem, 8vw, 2.8rem);
+    letter-spacing: 0.12em;
+    margin: 26px 0 14px;
+  }
+
+  .main-subtitle,
+  .main-sub {
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+  }
+
+  .main-sub {
+    margin: 34px 0;
+  }
+
+  .main-divider {
+    width: min(160px, 55vw);
+    margin: 22px auto;
+  }
+
+  nav {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 14px 16px;
+  }
+
+  .nav-logo {
+    font-size: 1.05rem;
+    letter-spacing: 2px;
+  }
+
+  .nav-links {
+    width: 100%;
+    gap: 12px 16px;
+    justify-content: flex-start;
+  }
+
+  .nav-links a {
+    font-size: 0.76rem;
+    letter-spacing: 0.18em;
+  }
+
+  .character-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .character-card {
+    aspect-ratio: auto;
+  }
+
+  .img-wrapper {
+    min-height: 340px;
+  }
+
+  .race-cards {
+    margin-top: 36px;
+    gap: 18px;
+  }
+
+  .race-photo {
+    height: 200px;
+  }
+
+  .race-summary {
+    padding: 22px 18px;
+  }
+
+  .race-summary h3 {
+    font-size: 1.25rem;
+  }
+
+  .race-panel,
+  .race-card:hover .race-panel {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  .race-stat {
+    min-width: 100%;
+    padding: 10px 0;
+    border-left: 0;
+    border-top: 1px solid rgba(201, 168, 76, 0.18);
+  }
+
+  .safe-lock-section {
+    margin-top: 56px;
+    gap: 20px;
+  }
+
+  .safe-lock-copy,
+  .safe-lock-panel {
+    padding: 18px;
+  }
+
+  .safe-lock-panel {
+    gap: 18px;
+  }
+
+  .safe-lock-door {
+    padding: 18px 12px;
+  }
+
+  .safe-lock-wheel {
+    width: 110px;
+    height: 110px;
+  }
+
+  .safe-lock-group input,
+  .safe-lock-button {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .scene-heading,
+  .safe-lock-copy {
+    text-align: center;
+  }
+
+  .city-scene-section {
+    margin-top: 52px;
+  }
+
+  .city-dossiers {
+    gap: 12px;
+  }
+
+  .city-dossier {
+    grid-template-columns: 1fr;
+  }
+
+  .city-dossier-index {
+    writing-mode: initial;
+    text-orientation: initial;
+    min-height: 42px;
+  }
+
+  .city-dossier-body {
+    padding: 16px;
+  }
+
+  .city-dossier-stats {
+    grid-column: auto;
+    padding: 0 16px 16px;
+    gap: 14px;
+  }
+
+  .quarantine-message {
+    padding: 24px 18px 28px;
+  }
+
+  .quarantine-message p {
+    text-align: center;
+  }
+
+  footer {
+    margin-top: 44px;
+    line-height: 1.8;
   }
 }
 
