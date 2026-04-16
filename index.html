@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Last of Us - Zona de Supervivencia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Share+Tech+Mono&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loader">
+  <canvas id="sporeCanvas"></canvas>
+  <div class="fungus-overlay"></div>
+  <svg class="veins" id="veinsSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+
+  <div class="mold-corner mold-tl"></div>
+  <div class="mold-corner mold-br"></div>
+  <div class="mold-corner mold-tr"></div>
+  <div class="mold-corner mold-bl"></div>
+
+  <div class="loader-content">
+    <svg class="cordyceps-icon" viewBox="0 0 200 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="100,60 40,30 10,50 55,65" fill="none" stroke="#4a7c59" stroke-width="1.5" opacity="0.85"/>
+      <polygon points="100,60 55,65 45,80 80,72" fill="none" stroke="#4a7c59" stroke-width="1.5" opacity="0.85"/>
+      <polygon points="100,60 160,30 190,50 145,65" fill="none" stroke="#4a7c59" stroke-width="1.5" opacity="0.85"/>
+      <polygon points="100,60 145,65 155,80 120,72" fill="none" stroke="#4a7c59" stroke-width="1.5" opacity="0.85"/>
+      <polygon points="95,55 105,55 108,75 92,75" fill="none" stroke="#6dbf7e" stroke-width="1.2" opacity="0.9"/>
+      <line x1="96" y1="75" x2="80" y2="100" stroke="#4a7c59" stroke-width="1.2" opacity="0.8"/>
+      <line x1="94" y1="78" x2="72" y2="108" stroke="#4a7c59" stroke-width="1.2" opacity="0.8"/>
+      <line x1="104" y1="75" x2="120" y2="100" stroke="#4a7c59" stroke-width="1.2" opacity="0.8"/>
+      <line x1="106" y1="78" x2="128" y2="108" stroke="#4a7c59" stroke-width="1.2" opacity="0.8"/>
+      <line x1="97" y1="75" x2="94" y2="155" stroke="#6dbf7e" stroke-width="1.5" opacity="0.9"/>
+      <line x1="103" y1="75" x2="106" y2="155" stroke="#6dbf7e" stroke-width="1.5" opacity="0.9"/>
+      <polygon points="94,155 106,155 100,170" fill="none" stroke="#6dbf7e" stroke-width="1.2" opacity="0.85"/>
+      <circle cx="100" cy="62" r="6" fill="none" stroke="#6dbf7e" stroke-width="1.2" opacity="0.9"/>
+    </svg>
+
+    <div class="loader-title">
+      The Last of Us
+      <span>Cordyceps Network</span>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">INICIALIZANDO SISTEMA FUNGICO...</div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-percent" id="progressPercent">0%</div>
+    </div>
+
+    <div class="status-line" id="statusLine">ESCANEANDO ESPORAS...</div>
+  </div>
+
+  <div class="warning-band">ZONA DE CUARENTENA - SECTOR CONTAMINADO - ACCESO RESTRINGIDO</div>
+</div>
+
+<div id="mainPage">
+  <div class="main-noise"></div>
+
+  <div class="main-content">
+    <nav>
+      <div class="nav-logo">The last of us</div>
+      <ul class="nav-links">
+        <li><a href="#personajes">Personajes</a></li>
+        <li><a href="#zombies">Infectados</a></li>
+        <li><a href="#zonas">Zonas</a></li>
+      </ul>
+    </nav>
+     <div class="main-title">GUIA DE SUPERVIVENCIA</div>
+    <div class="main-subtitle">OBJETIVO-SOBREVIVIR</div>
+    <div class="main-divider"></div>
+
+
+    <div class="main-body">
+      <div class="main-intro">
+        <div class="main-intro-alert">
+          <span class="main-intro-tag">[ALERTA CRITICA]</span>
+          <p class="main-intro-lead">La red de Cordyceps se ha extendido por el 60% de la superficie terrestre.</p>
+        </div>
+        <div class="main-intro-panel">
+          <div class="main-intro-overline">TRANSMISIÓN DE DATOS</div>
+          <div class="main-intro-row">
+            <span class="main-intro-label">ESTADO:</span>
+            <p>Este portal es el último nexo seguro</p>
+          </div>
+          <div class="main-intro-row">
+            <span class="main-intro-label">FUNCION:</span>
+            <p>Intercambio de información entre asentamientos</p>
+          </div>
+          <div class="main-intro-box">
+            <span class="main-intro-box-title">PROTOCOLO DE SUPERVIVENCIA</span>
+            <p>
+      Este portal es el ultimo nexo seguro para el intercambio de información entre asentamientos. Memoriza los sujetos, sus características, los tipos de infectados que hay para poder combatirlos y las diferentes zonas que hay para saber a que te enfrentas.
+            </p>
+            <p class="main-intro-box-copy">Memoriza los sujetos, sus caracterí­sticas, los tipos de infectados que hay para poder combatirlos y las diferentes zonas que hay para saber a que te enfrentas.</p>
+          </div>
+        </div>
+      </div>
+      <div class="main-title">PERSONAJES</div>
+    <div class="main-subtitle">SISTEMA DE COMUNICACIONES - ZONA DE EXCLUSION</div>
+    <div class="main-divider"></div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 120px;">
+
+        <div class="character-card">
+          <div class="img-wrapper" data-wrapper="joel">
+            <img src="JoelMiller.png" alt="Joel Miller" class="img-base">
+            <div class="zombie-mask" data-mask="joel">
+              <img src="JoelMillerZombie.png" alt="Joel Zombie" class="img-zombie">
+            </div>
+          </div>
+          <div class="card-info">
+            <h3>JOEL MILLER</h3>
+            <p>Edad: 52 años</p>
+            <p>Agilidad: Moderada</p>
+            <p>Combate: Experto en armas de fuego, rifles, pistolas y arcos</p>
+          </div>
+        </div>
+
+        <div class="character-card">
+          <div class="img-wrapper" data-wrapper="ellie">
+            <img src="EllieWilliams.png" alt="Ellie Williams" class="img-base">
+            <div class="zombie-mask" data-mask="ellie">
+              <img src="ElieWilliamsZombie.png" alt="Ellie Williams Zombie" class="img-zombie">
+            </div>
+          </div>
+          <div class="card-info">
+            <h3>Ellie Williams</h3>
+            <p>Edad: 19 años</p>
+            <p>Agilidad: Alta</p>
+            <p>Combate: Especialista en sigilo, uso de cuchillo y supervivencia</p>
+          </div>
+        </div>
+
+        <div class="character-card">
+          <div class="img-wrapper" data-wrapper="abby">
+            <img src="Abby.png" alt="Abby Anderson" class="img-base">
+            <div class="zombie-mask" data-mask="abby">
+              <img src="AbbyZombie.png" alt="Abby Zombie" class="img-zombie">
+            </div>
+          </div>
+          <div class="card-info">
+            <h3>ABBY ANDERSON</h3>
+            <p>Edad: 21 años</p>
+            <p>Agilidad: Moderada</p>
+            <p>Combate: Fuerza fisica superior, combate cuerpo a cuerpo, armas pesadas</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="zombie-switcher-wrap">
+      <div class="zombie-switcher" id="zombieSwitcher">Tipos de zombies</div>
+    </div>
+
+    <div class="race-cards">
+      <article class="race-card">
+        <div class="race-photo">
+          <img src="JoelMiller.png" alt="Ruta Ascenso Cordyceps">
+        </div>
+        <div class="race-summary">
+          <span class="race-code">ETAPA 02</span>
+          <h3>Acechadores</h3>
+        </div>
+        <div class="race-panel">
+          <div class="race-stat">
+            <span class="race-label">Tipo</span>
+            <strong>Stalkers</strong>
+          </div>
+          <div class="race-stat">
+            <span class="race-label">Características</span>
+            <strong>Sigilosos inteligentes  cazadores</strong>
+          </div>
+          <div class="race-stat">
+            <span class="race-label">Curiosidades</span>
+            <strong>Aún conservan algo de humanidad</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="race-card">
+        <div class="race-photo">
+          <img src="EllieWilliams.png" alt="Ruta Sector Cuarentena">
+        </div>
+        <div class="race-summary">
+          <span class="race-code">ETAPA 03</span>
+          <h3>Chasqueadores</h3>
+        </div>
+        <div class="race-panel">
+          <div class="race-stat">
+            <span class="race-label">Tipo</span>
+            <strong>Clickers</strong>
+          </div>
+          <div class="race-stat">
+            <span class="race-label">Características</span>
+            <strong>Ciegos pero letales dependen del sonido</strong>
+          </div>
+          <div class="race-stat">
+            <span class="race-label">Curiosidades</span>
+            <strong>Usan chasquidos para “ver” su entorno</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="race-card">
+        <div class="race-photo">
+          <img src="Abby.png" alt="Ruta Resistencia Zero">
+        </div>
+        <div class="race-summary">
+          <span class="race-code">ETAPA 04</span>
+          <h3>Gordinflones</h3>
+        </div>
+        <div class="race-panel">
+          <div class="race-stat">
+            <span class="race-label">Tipo</span>
+            <strong>Bloaters</strong>
+          </div>
+          <div class="race-stat">
+            <span class="race-label">Características</span>
+            <strong>Tanques vivientes fuerza resistencia máximas</strong>
+          </div>
+          <div class="race-stat">
+            <span class="race-label">Curiosidades</span>
+            <strong>Alta resistencia a armas requieren mucho daño para caer</strong>
+          </div>
+        </div>
+      </article>
+    </div>
+    
+    <div class="main-sub">LA INFORMACIÓN QUE SE VA HA MANEJAR A CONTINUACIÓN ES MATERIAL CONFIDENCIAL, INTRODUCE LA CONTRASEÑA CORRECTA.</div>
+
+    <section class="safe-lock-section">
+      <div class="safe-lock-copy">
+        <span class="safe-lock-tag">PROTOCOLO SELLADO</span>
+        <h2>Caja Fuerte de Acceso</h2>
+        <p>
+          Ajusta la combinacion correcta para abrir el compartimento seguro antes de entrar al sector abandonado.
+        </p>
+      </div>
+
+      <div class="safe-lock-panel" id="safeLockPanel">
+        <div class="safe-lock-door">
+          <div class="safe-lock-wheel" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="safe-lock-status" id="safeLockStatus">ESTADO: BLOQUEADO</div>
+        </div>
+
+        <form class="safe-lock-controls" id="safeLockForm">
+          <label class="safe-lock-group">
+            <span>Primer codigo</span>
+            <input type="number" id="safeFirst" min="0" max="99" value="0" inputmode="numeric">
+          </label>
+
+          <label class="safe-lock-group">
+            <span>Segundo codigo</span>
+            <input type="number" id="safeSecond" min="0" max="99" value="0" inputmode="numeric">
+          </label>
+
+          <label class="safe-lock-group">
+            <span>Tercer codigo</span>
+            <input type="number" id="safeThird" min="0" max="99" value="0" inputmode="numeric">
+          </label>
+
+          <button type="submit" class="safe-lock-button">Probar combinacion</button>
+          <p class="safe-lock-feedback" id="safeLockFeedback">Introduce tres bloques numericos en formato XX-XX-XX.</p>
+        </form>
+      </div>
+    </section>
+
+    <div class="locked-content" id="lockedContent" aria-hidden="true" hidden>
+      <div class="locked-content-inner">
+    <section class="city-scene-section">
+      <div class="scene-heading">
+        <span class="scene-code">SECTOR ABANDONADO</span>
+        <h2>Ciudades Devoradas Por El Cordyceps</h2>
+      </div>
+
+      <div class="city-dossiers">
+        <article class="city-dossier city-boston" style="--city-image: url('Boston.webp');">
+          <div class="city-dossier-index">01</div>
+          <div class="city-dossier-body">
+            <span class="city-dossier-tag">// ZONA DE CUARENTENA //</span>
+            <h3>Boston</h3>
+            <p>Zona militar controlada por FEDRA. Raciones escasas, ley marcial y un equilibrio roto entre miedo, comercio y supervivencia.</p>
+          </div>
+          <div class="city-dossier-stats">
+            <div><span>Peligro</span><strong>Alto</strong></div>
+            <div><span>Control</span><strong>FEDRA</strong></div>
+            <div><span>Estado</span><strong>Caido</strong></div>
+          </div>
+        </article>
+
+        <article class="city-dossier city-pittsburgh" style="--city-image: url('Boston.webp');">
+          <div class="city-dossier-index">02</div>
+          <div class="city-dossier-body">
+            <span class="city-dossier-tag">// CIUDAD ABANDONADA //</span>
+            <h3>Pittsburgh</h3>
+            <p>Los supervivientes expulsaron a FEDRA. Ahora las ruinas esconden emboscadas, edificios vacios y salidas bloqueadas.</p>
+          </div>
+          <div class="city-dossier-stats">
+            <div><span>Peligro</span><strong>Extremo</strong></div>
+            <div><span>Control</span><strong>Bandidos</strong></div>
+            <div><span>Estado</span><strong>Hostil</strong></div>
+          </div>
+        </article>
+
+        <article class="city-dossier city-jackson" style="--city-image: url('Boston.webp');">
+          <div class="city-dossier-index">03</div>
+          <div class="city-dossier-body">
+            <span class="city-dossier-tag">// COMUNIDAD SEGURA //</span>
+            <h3>Jackson</h3>
+            <p>Uno de los pocos asentamientos funcionales. Electricidad, patrullas y una sensacion real de refugio en medio del colapso.</p>
+          </div>
+          <div class="city-dossier-stats">
+            <div><span>Peligro</span><strong>Bajo</strong></div>
+            <div><span>Control</span><strong>Comunidad</strong></div>
+            <div><span>Estado</span><strong>Activo</strong></div>
+          </div>
+        </article>
+
+        <article class="city-dossier city-slc" style="--city-image: url('Boston.webp');">
+          <div class="city-dossier-index">04</div>
+          <div class="city-dossier-body">
+            <span class="city-dossier-tag">// BASE MILITAR //</span>
+            <h3>St. Mary's</h3>
+            <p>Destino final del primer viaje. Laboratorio secreto de las Luciernagas y uno de los lugares mas decisivos del brote.</p>
+          </div>
+          <div class="city-dossier-stats">
+            <div><span>Peligro</span><strong>Critico</strong></div>
+            <div><span>Control</span><strong>Luciernagas</strong></div>
+            <div><span>Estado</span><strong>Destruido</strong></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <footer>
+      CUARTEL DE SUPERVIVIENTES - UNIDAD DAM © 2033
+    </footer>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="safe-alert" id="safeAlert" aria-live="polite">
+  <div class="safe-alert-box" id="safeAlertBox"></div>
+</div>
+
+<div class="quarantine-lockout" id="quarantineLockout" aria-live="assertive">
+  <div class="quarantine-noise"></div>
+  <div class="quarantine-spores"></div>
+  <div class="quarantine-scanline"></div>
+  <div class="quarantine-message">
+    <span class="quarantine-kicker">PROTOCOLO DE EXPULSION</span>
+    <h2>ZONA DE CUARENTENA SELLADA</h2>
+    <p>Quedas excluido de la zona de cuarentena, ahora te toca sobrevivir solo. ¡SUERTE!</p>
+    <div class="quarantine-stamp">ACCESO RESTRINGIDO</div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+  const sections = document.querySelectorAll(".section");
+  window.addEventListener("scroll", () => {
+    sections.forEach(sec => {
+      const rect = sec.getBoundingClientRect();
+      if (rect.top < window.innerHeight - 100) {
+        sec.classList.add("visible");
+      }
+    });
+  });
+</script>
+</body>
+</html>

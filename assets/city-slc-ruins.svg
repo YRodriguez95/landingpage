@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6a5737"/>
+      <stop offset="44%" stop-color="#26271f"/>
+      <stop offset="100%" stop-color="#090b08"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="48%" cy="20%" r="30%">
+      <stop offset="0%" stop-color="#c8a56d" stop-opacity=".48"/>
+      <stop offset="65%" stop-color="#7c6540" stop-opacity=".12"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#151710" stop-opacity=".06"/>
+      <stop offset="42%" stop-color="#0a0c09" stop-opacity=".52"/>
+      <stop offset="100%" stop-color="#070806" stop-opacity=".94"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="700" fill="url(#sky)"/>
+  <rect width="1200" height="700" fill="url(#glow)"/>
+  <g fill="#111310">
+    <rect x="140" y="260" width="105" height="285"/>
+    <rect x="225" y="200" width="140" height="345"/>
+    <rect x="350" y="295" width="90" height="250"/>
+    <rect x="470" y="150" width="210" height="395"/>
+    <rect x="715" y="245" width="100" height="300"/>
+    <rect x="800" y="185" width="145" height="360"/>
+    <rect x="930" y="255" width="120" height="290"/>
+  </g>
+  <g fill="#181d18">
+    <rect x="525" y="110" width="95" height="75"/>
+    <rect x="565" y="70" width="15" height="80"/>
+    <path d="M610 150 C640 180 640 215 610 245" fill="none" stroke="#212821" stroke-width="10"/>
+  </g>
+  <g fill="#1d2b1c" opacity=".92">
+    <path d="M0 555 C140 505 250 585 365 545 S565 490 700 555 S990 635 1200 565 L1200 700 L0 700 Z"/>
+    <path d="M0 620 C120 595 250 655 390 625 S640 575 780 635 S1020 685 1200 625 L1200 700 L0 700 Z" fill="#263725"/>
+  </g>
+  <g stroke="#324733" stroke-width="6" opacity=".48">
+    <path d="M225 365 C260 335 300 410 350 378"/>
+    <path d="M535 255 C575 220 610 300 665 250"/>
+    <path d="M850 330 C890 290 930 380 975 340"/>
+  </g>
+  <rect width="1200" height="700" fill="url(#shade)"/>
+</svg>
