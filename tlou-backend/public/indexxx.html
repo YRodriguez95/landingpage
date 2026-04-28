@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Share+Tech+Mono&display=swap');
@@ -91,12 +92,12 @@
   .mold-tr { top:-40px; right:-40px; background:radial-gradient(#4a3d1a, transparent 70%); }
   .mold-bl { bottom:-40px; left:-40px; background:radial-gradient(#3a2d14, transparent 70%); }
   .header, nav, .form-panel, .toast { position:relative; z-index:1; }
-  .header { text-align:center;margin-bottom:32px; }
+  .header { text-align:center;margin-bottom:32px;width:100%;max-width:860px; }
   .channel-label { font-size:10px;letter-spacing:5px;color:var(--accent);text-transform:uppercase;margin-bottom:8px; }
   h1 { font-family:'Special Elite',serif;font-size:clamp(24px,4vw,46px);color:var(--text);margin-bottom:14px; }
   .subtitle { font-size:12px;line-height:1.7;color:var(--text-dim);letter-spacing:1px;max-width:580px;margin:0 auto; }
-  nav { display:flex;gap:0;border:1px solid var(--border);margin-bottom:28px; }
-  nav a { padding:10px 20px;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);text-decoration:none;border-right:1px solid var(--border);transition:all .2s; }
+  nav { display:flex;gap:0;border:1px solid var(--border);margin-bottom:28px;width:100%;max-width:860px; }
+  nav a { flex:1;padding:10px 20px;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);text-decoration:none;border-right:1px solid var(--border);transition:all .2s;text-align:center; }
   nav a:last-child { border-right:none; }
   nav a:hover,nav a.active { background:var(--surface);color:var(--accent); }
   .form-panel { border:1px solid var(--border);background:var(--surface);padding:36px;position:relative;width:100%;max-width:860px; }
@@ -118,12 +119,42 @@
   .btn:hover:not(:disabled) { background:var(--text);color:var(--bg); }
   .btn:disabled { opacity:.4;cursor:not-allowed; }
   .footer-hint { font-size:11px;color:var(--text-dim);letter-spacing:1px; }
-  .status-bar { display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-top:20px;padding-top:16px;border-top:1px solid var(--border); }
+  .status-bar { display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap; }
   .dot { width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite; }
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-  .toast { position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--success);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;padding:14px 20px;transform:translateX(200%);transition:transform .3s;z-index:999; }
+  .toast { position:fixed;bottom:24px;right:24px;max-width:min(420px,calc(100vw - 32px));background:var(--surface);border:1px solid var(--success);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;padding:14px 20px;transform:translateX(200%);transition:transform .3s;z-index:999; }
   .toast.show { transform:translateX(0); }
-  @media(max-width:600px){ .form-grid{grid-template-columns:1fr}.form-group.full{grid-column:1}.form-panel{padding:22px} }
+  @media(max-width:900px){
+    body { padding:32px 14px; }
+    .form-panel { padding:28px; }
+    .form-grid { gap:18px; }
+  }
+  @media(max-width:700px){
+    body { padding:24px 12px; }
+    .header { margin-bottom:24px; }
+    .channel-label { letter-spacing:3px; }
+    .subtitle { font-size:11px;letter-spacing:.6px; }
+    nav { flex-direction:column; }
+    nav a { border-right:none;border-bottom:1px solid var(--border);padding:14px 16px; }
+    nav a:last-child { border-bottom:none; }
+    .form-grid { grid-template-columns:1fr;gap:16px; }
+    .form-group.full { grid-column:1; }
+    .form-panel { padding:22px 18px; }
+    .form-footer { flex-direction:column;align-items:stretch;gap:12px; }
+    .btn { width:100%;padding:14px 18px; }
+    .footer-hint { text-align:center; }
+    .status-bar { align-items:flex-start; }
+    .toast { left:12px;right:12px;bottom:12px;max-width:none;transform:translateY(150%); }
+    .toast.show { transform:translateY(0); }
+  }
+  @media(max-width:420px){
+    h1 { font-size:30px; }
+    .channel-label { font-size:9px;letter-spacing:2px; }
+    label { letter-spacing:2px; }
+    input,select,textarea { font-size:16px;padding:12px 14px; }
+    .btn { font-size:10px;letter-spacing:2px; }
+    .status-bar { font-size:8px;letter-spacing:1px; }
+  }
 </style>
 </head>
 <body>
@@ -144,7 +175,7 @@
 </div>
 
 <nav>
-  <a href="index.html" class="active">📋 Nuevo Pedido</a>
+  <a href="indexxx.html" class="active">📋 Nuevo Pedido</a>
   <a href="pedidos.html">📦 Pedidos</a>
 </nav>
 

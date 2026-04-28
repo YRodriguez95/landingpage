@@ -1011,6 +1011,7 @@ nav {
   width: min(1100px, 100%);
   margin: 72px auto 0;
   padding: 34px;
+  text-align: center;
   border: 1px solid rgba(201, 168, 76, 0.16);
   background:
     linear-gradient(160deg, rgba(18, 20, 17, 0.96), rgba(8, 9, 8, 0.98)),
@@ -1020,7 +1021,7 @@ nav {
 
 .purchase-copy {
   max-width: 680px;
-  margin-bottom: 26px;
+  margin: 0 auto 26px;
 }
 
 .purchase-tag {
@@ -1101,6 +1102,7 @@ nav {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 14px 18px;
 }
 
