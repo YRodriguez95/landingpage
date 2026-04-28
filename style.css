@@ -24,6 +24,7 @@ html, body {
   overflow: auto;
   font-family: 'Share Tech Mono', monospace;
   color: var(--text);
+  scroll-behavior: smooth;
 }
 
 body {
@@ -1006,6 +1007,133 @@ nav {
   letter-spacing: 0.08em;
 }
 
+.purchase-section {
+  width: min(1100px, 100%);
+  margin: 72px auto 0;
+  padding: 34px;
+  border: 1px solid rgba(201, 168, 76, 0.16);
+  background:
+    linear-gradient(160deg, rgba(18, 20, 17, 0.96), rgba(8, 9, 8, 0.98)),
+    radial-gradient(circle at top right, rgba(109, 191, 126, 0.14), transparent 32%);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.28);
+}
+
+.purchase-copy {
+  max-width: 680px;
+  margin-bottom: 26px;
+}
+
+.purchase-tag {
+  display: inline-block;
+  margin-bottom: 14px;
+  color: #eca54d;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+}
+
+.purchase-copy h2 {
+  font-family: 'Special Elite', cursive;
+  font-size: clamp(1.7rem, 3.6vw, 2.6rem);
+  color: #d8cfb3;
+  line-height: 1.08;
+}
+
+.purchase-copy p {
+  margin-top: 16px;
+  color: #d9e4d6;
+  line-height: 1.75;
+}
+
+.purchase-form {
+  display: grid;
+  gap: 24px;
+}
+
+.purchase-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.purchase-field {
+  display: grid;
+  gap: 8px;
+  text-align: left;
+}
+
+.purchase-field-full {
+  grid-column: 1 / -1;
+}
+
+.purchase-field span {
+  color: #8da797;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.purchase-field input,
+.purchase-field select,
+.purchase-field textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(122, 143, 126, 0.26);
+  background: rgba(5, 7, 5, 0.82);
+  color: #eef7e8;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1rem;
+}
+
+.purchase-field textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.purchase-field input:focus,
+.purchase-field select:focus,
+.purchase-field textarea:focus {
+  outline: none;
+  border-color: rgba(201, 168, 76, 0.76);
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12);
+}
+
+.purchase-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 18px;
+}
+
+.purchase-button {
+  padding: 14px 20px;
+  border: 1px solid rgba(109, 191, 126, 0.7);
+  background: rgba(109, 191, 126, 0.12);
+  color: #dff5d8;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.purchase-button:hover {
+  transform: translateY(-2px);
+  background: rgba(109, 191, 126, 0.2);
+  box-shadow: 0 0 22px rgba(109, 191, 126, 0.16);
+}
+
+.purchase-feedback {
+  min-height: 24px;
+  color: #a6bba9;
+  font-size: 0.84rem;
+  letter-spacing: 0.08em;
+}
+
+.purchase-form.is-submitted .purchase-feedback {
+  color: #cdeab3;
+}
+
 .safe-alert {
   position: fixed;
   inset: 0;
@@ -1644,6 +1772,18 @@ body.locked-screen nav {
     grid-template-columns: 1fr;
   }
 
+  .purchase-section {
+    padding: 28px 22px;
+  }
+
+  .purchase-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .purchase-field-full {
+    grid-column: auto;
+  }
+
   .city-dossiers {
     grid-template-columns: 1fr;
   }
@@ -1827,6 +1967,11 @@ body.locked-screen nav {
     margin-top: 52px;
   }
 
+  .purchase-section {
+    margin-top: 52px;
+    padding: 20px 18px;
+  }
+
   .city-dossiers {
     gap: 12px;
   }
@@ -1855,13 +2000,87 @@ body.locked-screen nav {
     padding: 24px 18px 28px;
   }
 
-  .quarantine-message p {
-    text-align: center;
+.quarantine-message p {
+  text-align: center;
+}
+
+footer {
+  margin-top: 44px;
+  line-height: 1.8;
+}
+}
+
+.scroll-top-button {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  width: 58px;
+  height: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  border: 1px solid rgba(109, 191, 126, 0.55);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(109, 191, 126, 0.3), transparent 58%),
+    linear-gradient(180deg, rgba(16, 29, 17, 0.96), rgba(5, 9, 6, 0.98));
+  color: #d8f4df;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), 0 16px 36px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  z-index: 1200;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(18px) scale(0.9);
+  transition: opacity 0.25s ease, visibility 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+
+.scroll-top-button span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 1.85rem;
+  line-height: 1;
+  transform: translateY(-1px);
+  color: inherit;
+}
+
+.scroll-top-button.is-ready {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.scroll-top-button:hover {
+  border-color: rgba(109, 191, 126, 0.78);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(109, 191, 126, 0.4), transparent 58%),
+    linear-gradient(180deg, rgba(18, 35, 20, 0.98), rgba(8, 14, 9, 1));
+  box-shadow: 0 0 24px rgba(109, 191, 126, 0.2), 0 16px 36px rgba(0, 0, 0, 0.45);
+}
+
+.scroll-top-button:focus-visible {
+  outline: 2px solid rgba(201, 168, 76, 0.9);
+  outline-offset: 4px;
+}
+
+@media (max-width: 768px) {
+  .scroll-top-button {
+    right: 16px;
+    bottom: 16px;
+    width: 52px;
+    height: 52px;
   }
 
-  footer {
-    margin-top: 44px;
-    line-height: 1.8;
+  .scroll-top-button span {
+    width: 24px;
+    height: 24px;
+    font-size: 1.55rem;
   }
 }
 

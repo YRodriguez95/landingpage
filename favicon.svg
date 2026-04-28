@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="70%">
+      <stop offset="0%" stop-color="#173121"/>
+      <stop offset="65%" stop-color="#0d140d"/>
+      <stop offset="100%" stop-color="#050705"/>
+    </radialGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0" stdDeviation="1.2" flood-color="#6dbf7e" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+    <path d="M32 17 18 10 11 15 22 18" stroke="#4a7c59" stroke-width="1.8"/>
+    <path d="M32 17 22 18 19 22 27 20" stroke="#4a7c59" stroke-width="1.8"/>
+    <path d="M32 17 46 10 53 15 42 18" stroke="#4a7c59" stroke-width="1.8"/>
+    <path d="M32 17 42 18 45 22 37 20" stroke="#4a7c59" stroke-width="1.8"/>
+    <path d="M30.8 15.5h2.4l1 7.2h-4.4z" stroke="#6dbf7e" stroke-width="1.7"/>
+    <path d="M30.5 22.7 28.1 47.5" stroke="#6dbf7e" stroke-width="2.2"/>
+    <path d="M33.5 22.7 35.9 47.5" stroke="#6dbf7e" stroke-width="2.2"/>
+    <path d="M31.3 22.8 23.7 31.3" stroke="#4a7c59" stroke-width="1.6"/>
+    <path d="M29.6 24 21 34.8" stroke="#4a7c59" stroke-width="1.5"/>
+    <path d="M32.7 22.8 40.3 31.3" stroke="#4a7c59" stroke-width="1.6"/>
+    <path d="M34.4 24 43 34.8" stroke="#4a7c59" stroke-width="1.5"/>
+    <path d="M28.1 47.5h7.8L32 54z" stroke="#6dbf7e" stroke-width="1.7"/>
+    <circle cx="32" cy="17.7" r="3.4" stroke="#6dbf7e" stroke-width="1.7"/>
+  </g>
+</svg>

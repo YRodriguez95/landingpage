@@ -247,6 +247,9 @@ const progInterval = setInterval(()=>{
 function showMain() {
   document.getElementById('loader').classList.add('hidden');
   document.getElementById('mainPage').classList.add('visible');
+  if (scrollTopButton) {
+    scrollTopButton.classList.add('is-ready');
+  }
 }
 
 // ═══════════════════════════════
@@ -328,6 +331,9 @@ const safeAlert = document.getElementById('safeAlert');
 const safeAlertBox = document.getElementById('safeAlertBox');
 const quarantineLockout = document.getElementById('quarantineLockout');
 const lockedContent = document.getElementById('lockedContent');
+const scrollTopButton = document.getElementById('scrollTopButton');
+const purchaseForm = document.getElementById('purchaseForm');
+const purchaseFeedback = document.getElementById('purchaseFeedback');
 
 if (safeLockForm && safeLockPanel && safeLockStatus && safeLockFeedback && safeAlert && safeAlertBox && quarantineLockout && lockedContent) {
   const safeInputs = [
@@ -432,6 +438,37 @@ if (safeLockForm && safeLockPanel && safeLockStatus && safeLockFeedback && safeA
     }
 
     activateLockout();
+  });
+}
+
+if (purchaseForm && purchaseFeedback) {
+  purchaseForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    if (!purchaseForm.checkValidity()) {
+      purchaseFeedback.textContent = 'Rellena los campos obligatorios antes de confirmar la compra.';
+      return;
+    }
+
+    const buyerName = document.getElementById('buyerName');
+    const buyerEdition = document.getElementById('buyerEdition');
+    const buyerPlatform = document.getElementById('buyerPlatform');
+
+    const name = buyerName?.value.trim() || 'superviviente';
+    const edition = buyerEdition?.value || 'tu edicion';
+    const platform = buyerPlatform?.value || 'tu plataforma';
+
+    purchaseForm.classList.add('is-submitted');
+    purchaseFeedback.textContent = `${name}, tu pedido de la edicion ${edition} para ${platform} ha sido registrado.`;
+    purchaseForm.reset();
+  });
+}
+
+if (scrollTopButton) {
+  scrollTopButton.addEventListener('click', () => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   });
 }
 

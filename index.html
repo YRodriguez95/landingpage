@@ -4,9 +4,101 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>The Last of Us - Zona de Supervivencia</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Share+Tech+Mono&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Estilos del formulario mejorado */
+    .field-error { font-size:9px;color:#c0392b;letter-spacing:1px;min-height:13px;margin-top:4px;display:block; }
+    
+    .purchase-field input,
+    .purchase-field select,
+    .purchase-field textarea {
+      -webkit-appearance: none;
+      background-image: none;
+    }
+    
+    .purchase-field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238a7044' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 13px center;
+      padding-right: 34px;
+    }
+    
+    .purchase-field input.error,
+    .purchase-field select.error {
+      border-color: #c0392b !important;
+    }
+    
+    .purchase-button {
+      transition: all 0.2s;
+    }
+    
+    .purchase-button:hover:not(:disabled) {
+      background: var(--accent);
+      color: var(--bg);
+    }
+    
+    .purchase-button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .purchase-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      min-width: 320px;
+      max-width: 100%;
+    }
+    
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #27ae60;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface);
+      border: 1px solid #27ae60;
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      padding: 14px 20px;
+      transform: translateX(200%);
+      transition: transform 0.3s;
+      z-index: 999;
+    }
+    
+    .toast.show {
+      transform: translateX(0);
+    }
+  </style>
 </head>
 <body>
 
@@ -98,7 +190,7 @@
           </div>
         </div>
       </div>
-      <div class="main-title">PERSONAJES</div>
+      <div class="main-title" id="personajes">PERSONAJES</div>
     <div class="main-subtitle">SISTEMA DE COMUNICACIONES - ZONA DE EXCLUSION</div>
     <div class="main-divider"></div>
       <div class="character-grid">
@@ -151,7 +243,7 @@
       </div>
     </div>
 
-    <div class="zombie-switcher-wrap">
+    <div class="zombie-switcher-wrap" id="zombies">
       <div class="zombie-switcher" id="zombieSwitcher">Tipos de zombies</div>
     </div>
 
@@ -199,7 +291,7 @@
           </div>
           <div class="race-stat">
             <span class="race-label">Curiosidades</span>
-            <strong>Usan chasquidos para “ver” su entorno</strong>
+            <strong>Usan chasquidos para "ver" su entorno</strong>
           </div>
         </div>
       </article>
@@ -229,7 +321,7 @@
       </article>
     </div>
     
-    <div class="main-sub">LA INFORMACIÓN QUE SE VA HA MANEJAR A CONTINUACIÓN ES MATERIAL CONFIDENCIAL, INTRODUCE LA CONTRASEÑA CORRECTA.</div>
+    <div class="main-sub" id="zonas">LA INFORMACIÓN QUE SE VA HA MANEJAR A CONTINUACIÓN ES MATERIAL CONFIDENCIAL, INTRODUCE LA CONTRASEÑA CORRECTA.</div>
 
     <section class="safe-lock-section">
       <div class="safe-lock-copy">
@@ -339,6 +431,18 @@
       </div>
     </section>
 
+    <section class="purchase-section" id="comprar">
+      <div class="purchase-copy">
+        <span class="purchase-tag">CANAL DE SUMINISTROS</span>
+        <h2>Comprar The Last of Us</h2>
+        <p>Has validado la clave correcta. Completa este formulario para solicitar tu copia del juego desde el mercado seguro.</p>
+      </div>
+
+      <div class="purchase-actions">
+        <a class="purchase-button purchase-cta" href="tlou-backend/public/indexxx.html">Para comprar el juego pulse aqui</a>
+      </div>
+    </section>
+
     <footer>
       CUARTEL DE SUPERVIVIENTES - UNIDAD DAM © 2033
     </footer>
@@ -363,9 +467,15 @@
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
+<button class="scroll-top-button" id="scrollTopButton" type="button" aria-label="Volver al inicio" title="Volver arriba">
+  <span aria-hidden="true">&uarr;</span>
+</button>
+
 <script src="script.js"></script>
 <script>
-  const sections = document.querySelectorAll(".section");
+const sections = document.querySelectorAll(".section");
   window.addEventListener("scroll", () => {
     sections.forEach(sec => {
       const rect = sec.getBoundingClientRect();
@@ -377,3 +487,5 @@
 </script>
 </body>
 </html>
+
+
