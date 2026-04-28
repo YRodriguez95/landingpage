@@ -74,17 +74,8 @@
       "edicion": "Estándar",
       "notas": "prueba16",
       "fecha": "2026-04-27T23:26:00.463Z",
-      "estado": "pendiente"
-    },
-    {
-      "id": "TLU-AB1DOQ",
-      "nombre": "yoli",
-      "email": "prueba18@hotmail.com",
-      "plataforma": "PlayStation 4",
-      "edicion": "Digital Deluxe",
-      "notas": "prueba18",
-      "fecha": "2026-04-27T23:37:53.316Z",
-      "estado": "pendiente"
+      "estado": "completado",
+      "updatedAt": "2026-04-28T08:47:08.810Z"
     },
     {
       "id": "TLU-Q78YGP",
@@ -94,7 +85,50 @@
       "edicion": "Estándar",
       "notas": "prueba20",
       "fecha": "2026-04-28T00:58:40.654Z",
+      "estado": "cancelado",
+      "updatedAt": "2026-04-28T08:47:16.905Z"
+    },
+    {
+      "id": "TLU-DX6RCS",
+      "nombre": "yoli",
+      "email": "prueba21fer@hotmail.com",
+      "plataforma": "PlayStation 5",
+      "edicion": "Remasterizada",
+      "notas": "prueba con fer",
+      "fecha": "2026-04-28T08:46:30.455Z",
+      "estado": "cancelado",
+      "updatedAt": "2026-04-28T08:47:21.787Z"
+    },
+    {
+      "id": "TLU-KI6GCU",
+      "nombre": "fernando",
+      "email": "fernando@gmail.com",
+      "plataforma": "PlayStation 4",
+      "edicion": "Digital Deluxe",
+      "notas": "prueba fer",
+      "fecha": "2026-04-28T08:48:48.200Z",
       "estado": "pendiente"
+    },
+    {
+      "id": "TLU-P262J7",
+      "nombre": "marina",
+      "email": "marina@hotmail.com",
+      "plataforma": "PlayStation 4",
+      "edicion": "Estándar",
+      "notas": "ejemplo marina",
+      "fecha": "2026-04-28T12:36:49.707Z",
+      "estado": "pendiente"
+    },
+    {
+      "id": "TLU-UV8S5H",
+      "nombre": "pablo",
+      "email": "pablo@hotmail.com",
+      "plataforma": "PlayStation 5",
+      "edicion": "Digital Deluxe",
+      "notas": "ejemplo pablo",
+      "fecha": "2026-04-28T12:42:37.982Z",
+      "estado": "completado",
+      "updatedAt": "2026-04-28T12:42:49.410Z"
     }
   ]
 }
