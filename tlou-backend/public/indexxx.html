@@ -120,6 +120,7 @@
   .btn:disabled { opacity:.4;cursor:not-allowed; }
   .footer-hint { font-size:11px;color:var(--text-dim);letter-spacing:1px; }
   .status-bar { display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap; }
+  .api-hint { margin-top:10px;font-size:10px;line-height:1.6;color:var(--text-dim); }
   .dot { width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite; }
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
   .toast { position:fixed;bottom:24px;right:24px;max-width:min(420px,calc(100vw - 32px));background:var(--surface);border:1px solid var(--success);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;padding:14px 20px;transform:translateX(200%);transition:transform .3s;z-index:999; }
@@ -224,7 +225,8 @@
       <p class="footer-hint" id="footerHint">Completa todos los campos para registrar el pedido.</p>
     </div>
   </form>
-  <div class="status-bar"><div class="dot"></div><span>CONECTADO A API — http://localhost:3000</span></div>
+  <div class="status-bar"><div class="dot"></div><span id="statusText">CONECTANDO CON API...</span></div>
+  <p class="api-hint" id="apiHint">Si entras desde el móvil y no guarda, abre esta página usando la IP del PC: `http://TU-IP:3000/tlou-backend/public/indexxx.html` o añade `?apiHost=TU-IP:3000`.</p>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -405,7 +407,31 @@
   window.addEventListener('resize', resizeScene);
   initScene();
 
-  const API = 'http://localhost:3000/api';
+  function getApiBase() {
+    const params = new URLSearchParams(window.location.search);
+    const apiHostFromUrl = params.get('apiHost') || params.get('api');
+    const savedApiHost = localStorage.getItem('tlou-api-host');
+
+    if (apiHostFromUrl) {
+      localStorage.setItem('tlou-api-host', apiHostFromUrl);
+      return `http://${apiHostFromUrl}/api`;
+    }
+
+    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+      return `${window.location.origin}/api`;
+    }
+
+    if (savedApiHost) {
+      return `http://${savedApiHost}/api`;
+    }
+
+    return 'http://localhost:3000/api';
+  }
+
+  const API = getApiBase();
+  document.getElementById('statusText').textContent = 'API DETECTADA — ' + API;
+  document.getElementById('apiHint').textContent =
+    'Si entras desde el móvil y no guarda, abre esta página usando la IP del PC: http://TU-IP:3000/tlou-backend/public/indexxx.html o añade ?apiHost=TU-IP:3000.';
 
   const rules = {
     nombre:     { fn: v => v.trim().length >= 3,                         msg: 'Mínimo 3 caracteres.' },
@@ -451,15 +477,18 @@
         // Mostrar errores del servidor en los campos
         if (data.errors) Object.keys(data.errors).forEach(f => setErr(f, data.errors[f]));
         document.getElementById('footerHint').textContent = '⚠ Corrige los errores.';
+        document.getElementById('statusText').textContent = 'API ACTIVA — ERROR DE VALIDACION';
         return;
       }
 
       showToast('✓ Pedido ' + data.pedido.id + ' guardado en pedidos.json');
       document.getElementById('footerHint').textContent = 'Pedido ' + data.pedido.id + ' registrado.';
+      document.getElementById('statusText').textContent = 'API ACTIVA — PEDIDO GUARDADO';
       this.reset();
 
     } catch (err) {
       document.getElementById('footerHint').textContent = '✗ No se puede conectar con el servidor.';
+      document.getElementById('statusText').textContent = 'ERROR — NO SE PUEDE CONECTAR A ' + API;
       showToast('✗ Error: servidor no disponible');
     } finally {
       btn.disabled = false; btn.textContent = 'Confirmar Compra';

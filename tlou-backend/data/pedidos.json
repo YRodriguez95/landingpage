@@ -85,6 +85,16 @@
       "notas": "prueba18",
       "fecha": "2026-04-27T23:37:53.316Z",
       "estado": "pendiente"
+    },
+    {
+      "id": "TLU-Q78YGP",
+      "nombre": "yoli",
+      "email": "prueba20@hotmail.com",
+      "plataforma": "PlayStation 5",
+      "edicion": "Estándar",
+      "notas": "prueba20",
+      "fecha": "2026-04-28T00:58:40.654Z",
+      "estado": "pendiente"
     }
   ]
 }

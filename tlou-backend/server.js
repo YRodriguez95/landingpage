@@ -5,10 +5,13 @@ const path    = require('path');
 
 const app  = express();
 const PORT = 3000;
+const HOST = '0.0.0.0';
 const DB   = path.join(__dirname, 'data', 'pedidos.json');
+const ROOT = path.join(__dirname, '..');
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(ROOT));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -142,8 +145,9 @@ app.get('/api/stats', (req, res) => {
 });
 
 // ── START ──────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
   console.log(`\n🎮 TLOU Backend corriendo en http://localhost:${PORT}`);
+  console.log(`🌐 Red local habilitada en http://TU-IP-LOCAL:${PORT}`);
   console.log(`📁 Base de datos: ${DB}\n`);
   console.log('Rutas disponibles:');
   console.log('  GET    /api/pedidos              — listar pedidos');

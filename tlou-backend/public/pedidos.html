@@ -97,7 +97,28 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const API = 'http://localhost:3000/api';
+  function getApiBase() {
+    const params = new URLSearchParams(window.location.search);
+    const apiHostFromUrl = params.get('apiHost') || params.get('api');
+    const savedApiHost = localStorage.getItem('tlou-api-host');
+
+    if (apiHostFromUrl) {
+      localStorage.setItem('tlou-api-host', apiHostFromUrl);
+      return `http://${apiHostFromUrl}/api`;
+    }
+
+    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+      return `${window.location.origin}/api`;
+    }
+
+    if (savedApiHost) {
+      return `http://${savedApiHost}/api`;
+    }
+
+    return 'http://localhost:3000/api';
+  }
+
+  const API = getApiBase();
   let allPedidos = [];
 
   async function load() {
