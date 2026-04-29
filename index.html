@@ -37,7 +37,7 @@
     
     .purchase-button:hover:not(:disabled) {
       background: var(--accent);
-      color: var(--bg);
+      color: #dff5d8;
     }
     
     .purchase-button:disabled {
@@ -249,8 +249,7 @@
 
     <div class="race-cards">
       <article class="race-card">
-        <div class="race-photo">
-          <img src="JoelMiller.png" alt="Ruta Ascenso Cordyceps">
+        <div class="race-photo race-photo-bloater" data-bloater-sequence aria-label="Animacion de gordinflon">
         </div>
         <div class="race-summary">
           <span class="race-code">ETAPA 02</span>
@@ -272,9 +271,8 @@
         </div>
       </article>
 
-      <article class="race-card">
-        <div class="race-photo">
-          <img src="EllieWilliams.png" alt="Ruta Sector Cuarentena">
+      <article class="race-card race-card-clicker">
+        <div class="race-photo race-photo-clicker" data-clicker-sequence aria-label="Animacion de chasqueador">
         </div>
         <div class="race-summary">
           <span class="race-code">ETAPA 03</span>
@@ -487,5 +485,3 @@ const sections = document.querySelectorAll(".section");
 </script>
 </body>
 </html>
-
-

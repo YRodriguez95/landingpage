@@ -472,6 +472,129 @@ if (scrollTopButton) {
   });
 }
 
+function setupFrameSequence(hostSelector, frameTotal, framePathFactory) {
+  const sequenceHost = document.querySelector(hostSelector);
+  if (!sequenceHost) return;
+
+  const frameStack = document.createElement('div');
+  const frames = [];
+  const fragment = document.createDocumentFragment();
+  let loadedFrames = 0;
+  let isSequenceLoaded = false;
+  let hasStartedPreload = false;
+  let isPointerInside = false;
+
+  frameStack.className = 'clicker-frame-stack';
+
+  const preloadRemainingFrames = () => {
+    if (hasStartedPreload) return;
+    hasStartedPreload = true;
+
+    frames.slice(1).forEach((frame, index) => {
+      window.setTimeout(() => {
+        frame.src = frame.dataset.src;
+      }, index * 18);
+    });
+  };
+
+  const markFrameLoaded = (eventOrFrame) => {
+    const frame = eventOrFrame?.currentTarget || eventOrFrame;
+
+    if (frame?.dataset.sequenceLoaded === 'true') return;
+    if (frame) frame.dataset.sequenceLoaded = 'true';
+
+    loadedFrames += 1;
+
+    if (loadedFrames === 1) {
+      window.requestAnimationFrame(() => {
+        sequenceHost.classList.add('is-sequence-ready');
+      });
+      preloadRemainingFrames();
+    }
+
+    if (loadedFrames >= frameTotal) {
+      isSequenceLoaded = true;
+      sequenceHost.classList.add('is-sequence-loaded');
+      if (isPointerInside) startSequence();
+    }
+  };
+
+  for (let index = 0; index < frameTotal; index++) {
+    const currentFrame = String(index).padStart(4, '0');
+    const nextFrame = String(index + 1).padStart(4, '0');
+    const frame = document.createElement('img');
+    const frameSrc = framePathFactory(currentFrame, nextFrame);
+
+    frame.className = 'clicker-frame';
+    frame.alt = '';
+    frame.loading = index === 0 ? 'eager' : 'lazy';
+    frame.decoding = 'async';
+    frame.addEventListener('load', markFrameLoaded, { once: true });
+    frame.addEventListener('error', markFrameLoaded, { once: true });
+
+    if (index === 0) {
+      frame.src = frameSrc;
+      frame.classList.add('is-visible');
+    } else {
+      frame.dataset.src = frameSrc;
+    }
+
+    frames.push(frame);
+    fragment.appendChild(frame);
+  }
+
+  frameStack.appendChild(fragment);
+  sequenceHost.appendChild(frameStack);
+
+  let activeFrame = 0;
+  let sequenceInterval = null;
+
+  const showFrame = (frameIndex) => {
+    frames[activeFrame].classList.remove('is-visible');
+    activeFrame = frameIndex;
+    frames[activeFrame].classList.add('is-visible');
+  };
+
+  const startSequence = () => {
+    if (sequenceInterval !== null || !isSequenceLoaded) return;
+
+    sequenceInterval = window.setInterval(() => {
+      const nextFrame = (activeFrame + 1) % frames.length;
+      showFrame(nextFrame);
+    }, 90);
+  };
+
+  const stopSequence = () => {
+    if (sequenceInterval !== null) {
+      window.clearInterval(sequenceInterval);
+      sequenceInterval = null;
+    }
+
+    showFrame(0);
+  };
+
+  if (frames[0].complete) markFrameLoaded(frames[0]);
+
+  sequenceHost.addEventListener('mouseenter', () => {
+    isPointerInside = true;
+    startSequence();
+  });
+  sequenceHost.addEventListener('mouseleave', () => {
+    isPointerInside = false;
+    stopSequence();
+  });
+}
+
 // Arrancar
+setupFrameSequence(
+  '[data-bloater-sequence]',
+  48,
+  (currentFrame, nextFrame) => `Gordinflon sin fondo/gordinflon_${currentFrame}_${nextFrame}.png.png`
+);
+setupFrameSequence(
+  '[data-clicker-sequence]',
+  47,
+  (currentFrame, nextFrame) => `Chasqueador sin fondo/Keyframes_${currentFrame}_${nextFrame}.png.png`
+);
 init();
 animate();

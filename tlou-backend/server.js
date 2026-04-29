@@ -42,6 +42,11 @@ function validate(body) {
 
 // ── RUTAS ──────────────────────────────────────────────────────────────────
 
+// GET / — API funcionando
+app.get('/', (req, res) => {
+  res.send('API funcionando 🚀')
+});
+
 // GET /api/pedidos — listar todos (con filtros opcionales)
 app.get('/api/pedidos', (req, res) => {
   const db = readDB();

@@ -628,7 +628,7 @@ nav {
   border-color: #c9a84c;
   background: linear-gradient(90deg, rgba(42, 33, 12, 0.96), rgba(20, 28, 16, 0.94));
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
-  transform: translateX(8px);
+  transform: translateY(-4px);
 }
 
 .race-photo {
@@ -636,6 +636,53 @@ nav {
   min-width: 220px;
   position: relative;
   overflow: hidden;
+}
+
+.race-photo-clicker {
+  background:
+    radial-gradient(circle at top, rgba(201, 168, 76, 0.16), transparent 55%),
+    linear-gradient(180deg, rgba(16, 18, 15, 0.92), rgba(6, 9, 6, 0.98));
+}
+
+.race-photo-bloater {
+  background:
+    radial-gradient(circle at top, rgba(109, 191, 126, 0.14), transparent 58%),
+    linear-gradient(180deg, rgba(18, 22, 16, 0.92), rgba(7, 10, 7, 0.98));
+}
+
+.clicker-frame-stack {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  filter: blur(4px);
+  transition: opacity 0.55s ease, filter 0.55s ease;
+}
+
+.race-photo.is-sequence-ready .clicker-frame-stack {
+  opacity: 1;
+  filter: blur(0);
+}
+
+.clicker-frame {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  opacity: 0;
+  filter: saturate(0.85);
+  --frame-scale: 1;
+  --frame-hover-scale: 1;
+  transform-origin: center bottom;
+  transform: scale(calc(var(--frame-scale) * var(--frame-hover-scale)));
+  transition: opacity 0.28s ease, transform 0.45s ease, filter 0.45s ease;
+}
+
+.clicker-frame.is-visible {
+  opacity: 1;
 }
 
 .race-photo img {
@@ -648,8 +695,13 @@ nav {
   transition: transform 0.45s ease, filter 0.45s ease;
 }
 
-.race-card:hover .race-photo img {
+.race-card:hover .race-photo img:not(.clicker-frame) {
   transform: scale(1.05);
+  filter: saturate(1.05);
+}
+
+.race-card:hover .clicker-frame {
+  --frame-hover-scale: 1;
   filter: saturate(1.05);
 }
 
@@ -691,6 +743,19 @@ nav {
 }
 
 .race-card:hover .race-panel {
+  width: 100%;
+  opacity: 1;
+  padding: 28px 30px;
+}
+
+.race-card-clicker:hover {
+  border-color: #c9a84c;
+  background: linear-gradient(90deg, rgba(42, 33, 12, 0.96), rgba(20, 28, 16, 0.94));
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+  transform: none;
+}
+
+.race-card-clicker:hover .race-panel {
   width: 100%;
   opacity: 1;
   padding: 28px 30px;
