@@ -592,7 +592,7 @@ setupFrameSequence(
   (currentFrame, nextFrame) => `Gordinflon sin fondo/gordinflon_${currentFrame}_${nextFrame}.png.png`
 );
 setupFrameSequence(
-  '[data-clicker-sequence]',
+  '[data-clicker-sequence], .race-photo-clicker',
   47,
   (currentFrame, nextFrame) => `Chasqueador sin fondo/Keyframes_${currentFrame}_${nextFrame}.png.png`
 );

@@ -569,7 +569,9 @@ nav {
 }
 
 .zombie-switcher {
-  min-width: 320px;
+  width: 390px;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 15px 40px;
   color: #c9a84c;
   font-family: 'Share Tech Mono', monospace;
@@ -577,6 +579,7 @@ nav {
   letter-spacing: 0.28em;
   text-transform: uppercase;
   text-align: center;
+  white-space: nowrap;
   border: 1px solid rgba(201, 168, 76, 0.7);
   background: rgba(201, 168, 76, 0.05);
   filter: none;
@@ -590,7 +593,7 @@ nav {
   color: #f0d995;
   background: rgba(201, 168, 76, 0.16);
   box-shadow: 0 0 22px rgba(201, 168, 76, 0.18);
-  transform: translateY(-2px);
+  transform: none;
 }
 
 .zombie-switcher.is-changing {
@@ -600,7 +603,7 @@ nav {
 
 @media (max-width: 700px) {
   .zombie-switcher {
-    min-width: 100%;
+    width: 100%;
     padding: 14px 20px;
     letter-spacing: 0.18em;
   }
@@ -617,7 +620,8 @@ nav {
 .race-card {
   display: flex;
   align-items: stretch;
-  min-height: 180px;
+  height: 276px;
+  min-height: 276px;
   border: 1px solid #4a7c5944;
   background: linear-gradient(90deg, rgba(15, 20, 15, 0.92), rgba(11, 16, 10, 0.86));
   overflow: hidden;
@@ -642,6 +646,16 @@ nav {
   background:
     radial-gradient(circle at top, rgba(201, 168, 76, 0.16), transparent 55%),
     linear-gradient(180deg, rgba(16, 18, 15, 0.92), rgba(6, 9, 6, 0.98));
+}
+
+.race-photo-clicker .clicker-frame {
+  top: 5%;
+  bottom: auto;
+  height: 90%;
+  --frame-scale: 1.25;
+  object-fit: contain;
+  object-position: center center;
+  transform-origin: center center;
 }
 
 .race-photo-bloater {
@@ -672,6 +686,7 @@ nav {
   height: 100%;
   object-fit: contain;
   object-position: center bottom;
+  z-index: 1;
   opacity: 0;
   filter: saturate(0.85);
   --frame-scale: 1;
@@ -804,10 +819,16 @@ nav {
 
   .race-card {
     flex-direction: column;
+    height: auto;
+    min-height: 0;
   }
 
   .race-card:hover {
     transform: translateY(-4px);
+  }
+
+  .race-card-clicker:hover {
+    transform: none;
   }
 
   .race-photo,

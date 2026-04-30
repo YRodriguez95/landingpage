@@ -57,14 +57,14 @@
 <body>
 
 <nav>
-  <a href="indexxx.html">📋 Nuevo Pedido</a>
-  <a href="pedidos.html" class="active">📦 Pedidos</a>
+  <a href="indexxx.html">Nuevo Pedido</a>
+  <a href="pedidos.html" class="active">Pedidos</a>
 </nav>
 
 <div class="toolbar">
   <h1>Pedidos Registrados</h1>
   <span class="badge" id="badge">cargando...</span>
-  <button class="btn" onclick="load()">↺ Actualizar</button>
+  <button class="btn" onclick="load()">Actualizar</button>
 </div>
 
 <div class="filters">
@@ -78,9 +78,9 @@
   </select>
   <select class="filter-input" id="fEd" onchange="load()">
     <option value="">Todas las ediciones</option>
-    <option value="Estándar">Estándar</option>
+    <option value="Estandar">Estandar</option>
     <option value="Digital Deluxe">Digital Deluxe</option>
-    <option value="Edición Coleccionista">Edición Coleccionista</option>
+    <option value="Edicion Coleccionista">Edicion Coleccionista</option>
     <option value="Remasterizada">Remasterizada</option>
   </select>
   <select class="filter-input" id="fEst" onchange="load()">
@@ -107,12 +107,16 @@
       return `http://${apiHostFromUrl}/api`;
     }
 
-    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+    if (savedApiHost) {
+      return `http://${savedApiHost}/api`;
+    }
+
+    if ((window.location.protocol === 'http:' || window.location.protocol === 'https:') && window.location.port === '3000') {
       return `${window.location.origin}/api`;
     }
 
-    if (savedApiHost) {
-      return `http://${savedApiHost}/api`;
+    if (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      return `http://${window.location.hostname}:3000/api`;
     }
 
     return 'http://localhost:3000/api';
@@ -144,18 +148,18 @@
         : pedidos;
 
       document.getElementById('badge').textContent = allPedidos.length + ' de ' + total + ' pedido' + (total===1?'':'s');
-      document.getElementById('statusText').textContent = 'CONECTADO A API — LEYENDO pedidos.json';
+      document.getElementById('statusText').textContent = 'CONECTADO A API - LEYENDO MongoDB';
       render();
     } catch(e) {
-      document.getElementById('ordersList').innerHTML = `<div class="empty-state">✗ No se puede conectar con el servidor<p>Ejecuta: node server.js</p></div>`;
-      document.getElementById('statusText').textContent = 'ERROR — SERVIDOR NO DISPONIBLE';
+      document.getElementById('ordersList').innerHTML = `<div class="empty-state">No se puede conectar con el servidor<p>Ejecuta: npm start</p></div>`;
+      document.getElementById('statusText').textContent = 'ERROR - SERVIDOR NO DISPONIBLE';
     }
   }
 
   function render() {
     const list = document.getElementById('ordersList');
     if (!allPedidos.length) {
-      list.innerHTML = `<div class="empty-state">— Sin pedidos registrados —<p>Usa Nuevo Pedido para añadir suministros</p></div>`;
+      list.innerHTML = `<div class="empty-state">Sin pedidos registrados<p>Usa Nuevo Pedido para anadir suministros</p></div>`;
       return;
     }
     list.innerHTML = [...allPedidos].reverse().map(p => `
@@ -163,9 +167,9 @@
         <div>
           <div class="order-id">${p.id}</div>
           <div class="order-fields">
-            <strong>${p.nombre}</strong> &nbsp;·&nbsp; ${p.email}<br>
-            ${p.plataforma} &nbsp;·&nbsp; ${p.edicion}
-            ${p.notas ? `<br><span class="notas">📝 ${p.notas}</span>` : ''}
+            <strong>${p.nombre}</strong> &nbsp;-&nbsp; ${p.email}<br>
+            ${p.plataforma} &nbsp;-&nbsp; ${p.edicion}
+            ${p.notas ? `<br><span class="notas">${p.notas}</span>` : ''}
           </div>
         </div>
         <div class="order-meta">
@@ -175,9 +179,9 @@
           </div>
           <span class="status-badge status-${p.estado}">${p.estado.toUpperCase()}</span>
           <div class="actions">
-            ${p.estado !== 'completado' ? `<button class="btn-sm comp" onclick="cambiarEstado('${p.id}','completado')">✓ Completar</button>` : ''}
-            ${p.estado !== 'cancelado'  ? `<button class="btn-sm del"  onclick="cambiarEstado('${p.id}','cancelado')">✕ Cancelar</button>` : ''}
-            <button class="btn-sm del" onclick="eliminar('${p.id}')">🗑</button>
+            ${p.estado !== 'completado' ? `<button class="btn-sm comp" onclick="cambiarEstado('${p.id}','completado')">Completar</button>` : ''}
+            ${p.estado !== 'cancelado'  ? `<button class="btn-sm del"  onclick="cambiarEstado('${p.id}','cancelado')">Cancelar</button>` : ''}
+            <button class="btn-sm del" onclick="eliminar('${p.id}')">Eliminar</button>
           </div>
         </div>
       </div>`).join('');
@@ -190,18 +194,18 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ estado })
       });
-      showToast(`✓ Pedido ${id} → ${estado}`);
+      showToast(`Pedido ${id} -> ${estado}`);
       load();
-    } catch(e) { showToast('✗ Error al actualizar'); }
+    } catch(e) { showToast('Error al actualizar'); }
   }
 
   async function eliminar(id) {
-    if (!confirm(`¿Eliminar el pedido ${id} del archivo JSON?`)) return;
+    if (!confirm(`Eliminar el pedido ${id} de MongoDB?`)) return;
     try {
       await fetch(`${API}/pedidos/${id}`, { method: 'DELETE' });
-      showToast(`🗑 Pedido ${id} eliminado del JSON`);
+      showToast(`Pedido ${id} eliminado de MongoDB`);
       load();
-    } catch(e) { showToast('✗ Error al eliminar'); }
+    } catch(e) { showToast('Error al eliminar'); }
   }
 
   function showToast(msg) {

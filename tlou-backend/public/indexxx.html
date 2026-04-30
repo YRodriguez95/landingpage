@@ -176,8 +176,8 @@
 </div>
 
 <nav>
-  <a href="indexxx.html" class="active">📋 Nuevo Pedido</a>
-  <a href="pedidos.html">📦 Pedidos</a>
+  <a href="indexxx.html" class="active">Nuevo Pedido</a>
+  <a href="pedidos.html">Pedidos</a>
 </nav>
 
 <div class="form-panel">
@@ -189,7 +189,7 @@
         <div class="field-error" id="err-nombre"></div>
       </div>
       <div class="form-group">
-        <label for="email">Correo Electrónico</label>
+        <label for="email">Correo Electronico</label>
         <input type="email" id="email" placeholder="survivor@zona.com">
         <div class="field-error" id="err-email"></div>
       </div>
@@ -205,18 +205,18 @@
         <div class="field-error" id="err-plataforma"></div>
       </div>
       <div class="form-group">
-        <label for="edicion">Edición</label>
+        <label for="edicion">Edicion</label>
         <select id="edicion">
-          <option value="">Selecciona una edición</option>
-          <option value="Estándar">Estándar - 69,99€</option>
-          <option value="Digital Deluxe">Digital Deluxe - 89,99€</option>
-          <option value="Edición Coleccionista">Edición Coleccionista - 99,99€</option>
-          <option value="Remasterizada">Remasterizada -109,99€</option>
+          <option value="">Selecciona una edicion</option>
+          <option value="Estandar">Estandar - 69,99 EUR</option>
+          <option value="Digital Deluxe">Digital Deluxe - 89,99 EUR</option>
+          <option value="Edicion Coleccionista">Edicion Coleccionista - 99,99 EUR</option>
+          <option value="Remasterizada">Remasterizada -109,99 EUR</option>
         </select>
         <div class="field-error" id="err-edicion"></div>
       </div>
       <div class="form-group full">
-        <label for="notas">Notas para el Envío</label>
+        <label for="notas">Notas para el Envio</label>
         <textarea id="notas" placeholder="Indica si quieres que te avisemos cuando llegue el suministro."></textarea>
       </div>
     </div>
@@ -226,7 +226,7 @@
     </div>
   </form>
   <div class="status-bar"><div class="dot"></div><span id="statusText">CONECTANDO CON API...</span></div>
-  <p class="api-hint" id="apiHint">Si entras desde el móvil y no guarda, abre esta página usando la IP del PC: `http://TU-IP:3000/tlou-backend/public/indexxx.html` o añade `?apiHost=TU-IP:3000`.</p>
+  <p class="api-hint" id="apiHint">Si entras desde el movil y no guarda, abre esta pagina usando la IP del PC: `http://TU-IP:3000/tlou-backend/public/indexxx.html` o anade `?apiHost=TU-IP:3000`.</p>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -417,27 +417,31 @@
       return `http://${apiHostFromUrl}/api`;
     }
 
-    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
-      return `${window.location.origin}/api`;
-    }
-
     if (savedApiHost) {
       return `http://${savedApiHost}/api`;
     }
 
-    return '"https://mi-backend.onrender.com/api/pedidos"';
+    if ((window.location.protocol === 'http:' || window.location.protocol === 'https:') && window.location.port === '3000') {
+      return `${window.location.origin}/api`;
+    }
+
+    if (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      return `http://${window.location.hostname}:3000/api`;
+    }
+
+    return 'http://localhost:3000/api';
   }
 
   const API = getApiBase();
-  document.getElementById('statusText').textContent = 'API DETECTADA — ' + API;
+  document.getElementById('statusText').textContent = 'API DETECTADA - ' + API;
   document.getElementById('apiHint').textContent =
-    'Si entras desde el móvil y no guarda, abre esta página usando la IP del PC: http://TU-IP:3000/tlou-backend/public/indexxx.html o añade ?apiHost=TU-IP:3000.';
+    'Si entras desde el movil y no guarda, abre esta pagina usando la IP del PC: http://TU-IP:3000/tlou-backend/public/indexxx.html o anade ?apiHost=TU-IP:3000.';
 
   const rules = {
-    nombre:     { fn: v => v.trim().length >= 3,                         msg: 'Mínimo 3 caracteres.' },
-    email:      { fn: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()), msg: 'Email no válido.' },
+    nombre:     { fn: v => v.trim().length >= 3,                         msg: 'Minimo 3 caracteres.' },
+    email:      { fn: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()), msg: 'Email no valido.' },
     plataforma: { fn: v => v !== '',                                      msg: 'Selecciona una plataforma.' },
-    edicion:    { fn: v => v !== '',                                      msg: 'Selecciona una edición.' }
+    edicion:    { fn: v => v !== '',                                      msg: 'Selecciona una edicion.' }
   };
 
   function setErr(f, m) { document.getElementById(f).classList.add('error'); document.getElementById('err-'+f).textContent = m; }
@@ -453,7 +457,7 @@
     e.preventDefault();
     let bad = false;
     Object.keys(rules).forEach(f => { const v = document.getElementById(f).value; !rules[f].fn(v) ? (setErr(f, rules[f].msg), bad=true) : clrErr(f); });
-    if (bad) { document.getElementById('footerHint').textContent = '⚠ Revisa los campos con errores.'; return; }
+    if (bad) { document.getElementById('footerHint').textContent = 'Revisa los campos con errores.'; return; }
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true; btn.textContent = 'Enviando...';
@@ -476,20 +480,20 @@
       if (!res.ok) {
         // Mostrar errores del servidor en los campos
         if (data.errors) Object.keys(data.errors).forEach(f => setErr(f, data.errors[f]));
-        document.getElementById('footerHint').textContent = '⚠ Corrige los errores.';
-        document.getElementById('statusText').textContent = 'API ACTIVA — ERROR DE VALIDACION';
+        document.getElementById('footerHint').textContent = 'Corrige los errores.';
+        document.getElementById('statusText').textContent = 'API ACTIVA - ERROR DE VALIDACION';
         return;
       }
 
-      showToast('✓ Pedido ' + data.pedido.id + ' guardado en pedidos.json');
+      showToast('Pedido ' + data.pedido.id + ' guardado en MongoDB');
       document.getElementById('footerHint').textContent = 'Pedido ' + data.pedido.id + ' registrado.';
-      document.getElementById('statusText').textContent = 'API ACTIVA — PEDIDO GUARDADO';
+      document.getElementById('statusText').textContent = 'API ACTIVA - PEDIDO GUARDADO';
       this.reset();
 
     } catch (err) {
-      document.getElementById('footerHint').textContent = '✗ No se puede conectar con el servidor.';
-      document.getElementById('statusText').textContent = 'ERROR — NO SE PUEDE CONECTAR A ' + API;
-      showToast('✗ Error: servidor no disponible');
+      document.getElementById('footerHint').textContent = 'No se puede conectar con el servidor.';
+      document.getElementById('statusText').textContent = 'ERROR - NO SE PUEDE CONECTAR A ' + API;
+      showToast('Error: servidor no disponible');
     } finally {
       btn.disabled = false; btn.textContent = 'Confirmar Compra';
     }

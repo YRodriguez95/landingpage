@@ -129,6 +129,26 @@
       "fecha": "2026-04-28T12:42:37.982Z",
       "estado": "completado",
       "updatedAt": "2026-04-28T12:42:49.410Z"
+    },
+    {
+      "id": "TLU-W00WH7",
+      "nombre": "sdsdsd",
+      "email": "das@hotmail.com",
+      "plataforma": "PlayStation 4",
+      "edicion": "Estándar",
+      "notas": "sdfs",
+      "fecha": "2026-04-30T12:43:13.593Z",
+      "estado": "pendiente"
+    },
+    {
+      "id": "TLU-SOY7V6",
+      "nombre": "pruebamongo1",
+      "email": "pruebamongo1@hotmail.com",
+      "plataforma": "PlayStation 4",
+      "edicion": "Estandar",
+      "notas": "pruebamongo1",
+      "fecha": "2026-04-30T12:55:04.208Z",
+      "estado": "pendiente"
     }
   ]
 }

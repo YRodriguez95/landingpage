@@ -1,12 +1,12 @@
 const express = require('express');
-const cors    = require('cors');
-const fs      = require('fs');
-const path    = require('path');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const path = require('path');
 
-const app  = express();
-const PORT = 3000;
+const app = express();
+const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0';
-const DB   = path.join(__dirname, 'data', 'pedidos.json');
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/tlou';
 const ROOT = path.join(__dirname, '..');
 
 app.use(cors());
@@ -14,153 +14,252 @@ app.use(express.json());
 app.use(express.static(ROOT));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-function readDB() {
-  return JSON.parse(fs.readFileSync(DB, 'utf-8'));
-}
+const pedidoSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    required: true,
+    unique: true,
+    index: true
+  },
+  nombre: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  email: {
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true
+  },
+  plataforma: {
+    type: String,
+    required: true
+  },
+  edicion: {
+    type: String,
+    required: true
+  },
+  notas: {
+    type: String,
+    default: null
+  },
+  fecha: {
+    type: Date,
+    default: Date.now
+  },
+  estado: {
+    type: String,
+    enum: ['pendiente', 'completado', 'cancelado'],
+    default: 'pendiente'
+  },
+  updatedAt: Date
+}, {
+  collection: 'pedidos',
+  versionKey: false,
+  toJSON: {
+    transform: (_doc, ret) => {
+      delete ret._id;
+      return ret;
+    }
+  }
+});
 
-function writeDB(data) {
-  fs.writeFileSync(DB, JSON.stringify(data, null, 2), 'utf-8');
-}
+const Pedido = mongoose.model('Pedido', pedidoSchema);
 
 function generateId() {
   return 'TLU-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
+function cleanPedido(pedido) {
+  const data = typeof pedido.toJSON === 'function' ? pedido.toJSON() : { ...pedido };
+  delete data._id;
+  delete data.__v;
+  return data;
+}
+
 function validate(body) {
   const errors = {};
-  if (!body.nombre || body.nombre.trim().length < 3)
+
+  if (!body.nombre || body.nombre.trim().length < 3) {
     errors.nombre = 'El nombre debe tener al menos 3 caracteres.';
-  if (!body.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email))
-    errors.email = 'El email no es válido.';
-  if (!body.plataforma)
+  }
+
+  if (!body.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
+    errors.email = 'El email no es valido.';
+  }
+
+  if (!body.plataforma) {
     errors.plataforma = 'La plataforma es obligatoria.';
-  if (!body.edicion)
-    errors.edicion = 'La edición es obligatoria.';
+  }
+
+  if (!body.edicion) {
+    errors.edicion = 'La edicion es obligatoria.';
+  }
+
   return errors;
 }
 
-// ── RUTAS ──────────────────────────────────────────────────────────────────
+function asyncRoute(handler) {
+  return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
+}
 
-// GET / — API funcionando
 app.get('/', (req, res) => {
-  res.send('API funcionando 🚀')
+  res.send('API funcionando con MongoDB');
 });
 
-// GET /api/pedidos — listar todos (con filtros opcionales)
-app.get('/api/pedidos', (req, res) => {
-  const db = readDB();
-  let pedidos = [...db.pedidos];
-
+app.get('/api/pedidos', asyncRoute(async (req, res) => {
   const { nombre, plataforma, edicion, estado } = req.query;
-  if (nombre)     pedidos = pedidos.filter(p => p.nombre.toLowerCase().includes(nombre.toLowerCase()));
-  if (plataforma) pedidos = pedidos.filter(p => p.plataforma === plataforma);
-  if (edicion)    pedidos = pedidos.filter(p => p.edicion === edicion);
-  if (estado)     pedidos = pedidos.filter(p => p.estado === estado);
+  const query = {};
 
-  res.json({ total: pedidos.length, pedidos });
-});
+  if (nombre) {
+    query.nombre = { $regex: nombre, $options: 'i' };
+  }
 
-// GET /api/pedidos/:id — obtener uno
-app.get('/api/pedidos/:id', (req, res) => {
-  const db = readDB();
-  const pedido = db.pedidos.find(p => p.id === req.params.id);
-  if (!pedido) return res.status(404).json({ error: 'Pedido no encontrado.' });
-  res.json(pedido);
-});
+  if (plataforma) {
+    query.plataforma = plataforma;
+  }
 
-// POST /api/pedidos — crear nuevo pedido
-app.post('/api/pedidos', (req, res) => {
+  if (edicion) {
+    query.edicion = edicion;
+  }
+
+  if (estado) {
+    query.estado = estado;
+  }
+
+  const pedidos = await Pedido.find(query).sort({ fecha: 1 });
+  res.json({ total: pedidos.length, pedidos: pedidos.map(cleanPedido) });
+}));
+
+app.get('/api/pedidos/:id', asyncRoute(async (req, res) => {
+  const pedido = await Pedido.findOne({ id: req.params.id });
+
+  if (!pedido) {
+    return res.status(404).json({ error: 'Pedido no encontrado.' });
+  }
+
+  res.json(cleanPedido(pedido));
+}));
+
+app.post('/api/pedidos', asyncRoute(async (req, res) => {
   const errors = validate(req.body);
-  if (Object.keys(errors).length) return res.status(400).json({ errors });
 
-  const db = readDB();
-  const pedido = {
-    id:         generateId(),
-    nombre:     req.body.nombre.trim(),
-    email:      req.body.email.trim().toLowerCase(),
+  if (Object.keys(errors).length) {
+    return res.status(400).json({ errors });
+  }
+
+  const pedido = await Pedido.create({
+    id: generateId(),
+    nombre: req.body.nombre.trim(),
+    email: req.body.email.trim().toLowerCase(),
     plataforma: req.body.plataforma,
-    edicion:    req.body.edicion,
-    notas:      req.body.notas?.trim() || null,
-    fecha:      new Date().toISOString(),
-    estado:     'pendiente'
-  };
+    edicion: req.body.edicion,
+    notas: req.body.notas?.trim() || null,
+    estado: 'pendiente'
+  });
 
-  db.pedidos.push(pedido);
-  writeDB(db);
+  console.log(`[POST] Pedido creado en MongoDB: ${pedido.id} - ${pedido.nombre}`);
+  res.status(201).json({
+    message: 'Pedido registrado correctamente.',
+    pedido: cleanPedido(pedido)
+  });
+}));
 
-  console.log(`[POST] Pedido creado: ${pedido.id} — ${pedido.nombre}`);
-  res.status(201).json({ message: 'Pedido registrado correctamente.', pedido });
-});
-
-// PATCH /api/pedidos/:id/estado — cambiar estado
-app.patch('/api/pedidos/:id/estado', (req, res) => {
+app.patch('/api/pedidos/:id/estado', asyncRoute(async (req, res) => {
   const estadosValidos = ['pendiente', 'completado', 'cancelado'];
   const { estado } = req.body;
 
-  if (!estadosValidos.includes(estado))
-    return res.status(400).json({ error: `Estado inválido. Usa: ${estadosValidos.join(', ')}` });
+  if (!estadosValidos.includes(estado)) {
+    return res.status(400).json({ error: `Estado invalido. Usa: ${estadosValidos.join(', ')}` });
+  }
 
-  const db = readDB();
-  const pedido = db.pedidos.find(p => p.id === req.params.id);
-  if (!pedido) return res.status(404).json({ error: 'Pedido no encontrado.' });
+  const pedido = await Pedido.findOneAndUpdate(
+    { id: req.params.id },
+    { estado, updatedAt: new Date() },
+    { new: true }
+  );
 
-  pedido.estado = estado;
-  pedido.updatedAt = new Date().toISOString();
-  writeDB(db);
+  if (!pedido) {
+    return res.status(404).json({ error: 'Pedido no encontrado.' });
+  }
 
-  console.log(`[PATCH] Pedido ${pedido.id} → estado: ${estado}`);
-  res.json({ message: 'Estado actualizado.', pedido });
-});
+  console.log(`[PATCH] Pedido ${pedido.id} -> estado: ${estado}`);
+  res.json({ message: 'Estado actualizado.', pedido: cleanPedido(pedido) });
+}));
 
-// DELETE /api/pedidos/:id — eliminar pedido
-app.delete('/api/pedidos/:id', (req, res) => {
-  const db = readDB();
-  const index = db.pedidos.findIndex(p => p.id === req.params.id);
-  if (index === -1) return res.status(404).json({ error: 'Pedido no encontrado.' });
+app.delete('/api/pedidos/:id', asyncRoute(async (req, res) => {
+  const eliminado = await Pedido.findOneAndDelete({ id: req.params.id });
 
-  const [eliminado] = db.pedidos.splice(index, 1);
-  writeDB(db);
+  if (!eliminado) {
+    return res.status(404).json({ error: 'Pedido no encontrado.' });
+  }
 
   console.log(`[DELETE] Pedido eliminado: ${eliminado.id}`);
-  res.json({ message: `Pedido ${eliminado.id} eliminado.`, pedido: eliminado });
-});
-
-// GET /api/db — descargar el JSON completo
-app.get('/api/db', (req, res) => {
-  res.download(DB, 'pedidos.json');
-});
-
-// GET /api/stats — estadísticas rápidas
-app.get('/api/stats', (req, res) => {
-  const db = readDB();
-  const pedidos = db.pedidos;
   res.json({
-    total:       pedidos.length,
-    pendientes:  pedidos.filter(p => p.estado === 'pendiente').length,
+    message: `Pedido ${eliminado.id} eliminado.`,
+    pedido: cleanPedido(eliminado)
+  });
+}));
+
+app.get('/api/db', asyncRoute(async (req, res) => {
+  const pedidos = await Pedido.find().sort({ fecha: 1 });
+
+  res.json({
+    canal: 'The Last of Us - Mercado Seguro',
+    version: 'mongo',
+    pedidos: pedidos.map(cleanPedido)
+  });
+}));
+
+app.get('/api/stats', asyncRoute(async (req, res) => {
+  const pedidos = await Pedido.find();
+
+  res.json({
+    total: pedidos.length,
+    pendientes: pedidos.filter(p => p.estado === 'pendiente').length,
     completados: pedidos.filter(p => p.estado === 'completado').length,
-    cancelados:  pedidos.filter(p => p.estado === 'cancelado').length,
+    cancelados: pedidos.filter(p => p.estado === 'cancelado').length,
     porPlataforma: pedidos.reduce((acc, p) => {
-      acc[p.plataforma] = (acc[p.plataforma] || 0) + 1; return acc;
+      acc[p.plataforma] = (acc[p.plataforma] || 0) + 1;
+      return acc;
     }, {}),
     porEdicion: pedidos.reduce((acc, p) => {
-      acc[p.edicion] = (acc[p.edicion] || 0) + 1; return acc;
+      acc[p.edicion] = (acc[p.edicion] || 0) + 1;
+      return acc;
     }, {})
   });
+}));
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: 'Error interno del servidor.' });
 });
 
-// ── START ──────────────────────────────────────────────────────────────────
-app.listen(PORT, HOST, () => {
-  console.log(`\n🎮 TLOU Backend corriendo en http://localhost:${PORT}`);
-  console.log(`🌐 Red local habilitada en http://TU-IP-LOCAL:${PORT}`);
-  console.log(`📁 Base de datos: ${DB}\n`);
-  console.log('Rutas disponibles:');
-  console.log('  GET    /api/pedidos              — listar pedidos');
-  console.log('  GET    /api/pedidos?nombre=Joel  — filtrar');
-  console.log('  GET    /api/pedidos/:id          — obtener uno');
-  console.log('  POST   /api/pedidos              — crear pedido');
-  console.log('  PATCH  /api/pedidos/:id/estado   — cambiar estado');
-  console.log('  DELETE /api/pedidos/:id          — eliminar');
-  console.log('  GET    /api/stats                — estadísticas');
-  console.log('  GET    /api/db                   — descargar JSON\n');
+async function start() {
+  await mongoose.connect(MONGODB_URI, {
+    serverSelectionTimeoutMS: 5000
+  });
+
+  app.listen(PORT, HOST, () => {
+    console.log(`\nTLOU Backend corriendo en http://localhost:${PORT}`);
+    console.log(`Red local habilitada en http://TU-IP-LOCAL:${PORT}`);
+    console.log(`MongoDB conectado: ${mongoose.connection.host}/${mongoose.connection.name}\n`);
+    console.log('Rutas disponibles:');
+    console.log('  GET    /api/pedidos              - listar pedidos');
+    console.log('  GET    /api/pedidos?nombre=Joel  - filtrar');
+    console.log('  GET    /api/pedidos/:id          - obtener uno');
+    console.log('  POST   /api/pedidos              - crear pedido');
+    console.log('  PATCH  /api/pedidos/:id/estado   - cambiar estado');
+    console.log('  DELETE /api/pedidos/:id          - eliminar');
+    console.log('  GET    /api/stats                - estadisticas');
+    console.log('  GET    /api/db                   - exportar JSON desde MongoDB\n');
+  });
+}
+
+start().catch(err => {
+  console.error('No se pudo conectar con MongoDB.');
+  console.error(`URI usada: ${MONGODB_URI}`);
+  console.error(err.message);
+  process.exit(1);
 });
