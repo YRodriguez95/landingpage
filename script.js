@@ -586,15 +586,18 @@ function setupFrameSequence(hostSelector, frameTotal, framePathFactory) {
 }
 
 // Arrancar
-setupFrameSequence(
-  '[data-bloater-sequence]',
-  48,
-  (currentFrame, nextFrame) => `Gordinflon sin fondo/gordinflon_${currentFrame}_${nextFrame}.png.png`
-);
-setupFrameSequence(
-  '[data-clicker-sequence], .race-photo-clicker',
-  47,
-  (currentFrame, nextFrame) => `Chasqueador sin fondo/Keyframes_${currentFrame}_${nextFrame}.png.png`
-);
+document.querySelectorAll('[data-hover-video]').forEach((video) => {
+  const videoHost = video.closest('.race-photo') || video;
+
+  videoHost.addEventListener('mouseenter', () => {
+    video.play().catch(() => {});
+  });
+
+  videoHost.addEventListener('mouseleave', () => {
+    video.pause();
+    video.currentTime = 0;
+  });
+});
+
 init();
 animate();

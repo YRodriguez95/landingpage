@@ -9,6 +9,8 @@ const HOST = '0.0.0.0';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/tlou';
 const ROOT = path.join(__dirname, '..');
 
+mongoose.set('bufferCommands', false);
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static(ROOT));
@@ -103,6 +105,16 @@ function validate(body) {
 function asyncRoute(handler) {
   return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 }
+
+app.use('/api', (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      error: 'Base de datos no disponible. Inicia MongoDB para usar la API.'
+    });
+  }
+
+  next();
+});
 
 app.get('/', (req, res) => {
   res.send('API funcionando con MongoDB');
@@ -237,14 +249,10 @@ app.use((err, req, res, next) => {
 });
 
 async function start() {
-  await mongoose.connect(MONGODB_URI, {
-    serverSelectionTimeoutMS: 5000
-  });
-
   app.listen(PORT, HOST, () => {
     console.log(`\nTLOU Backend corriendo en http://localhost:${PORT}`);
     console.log(`Red local habilitada en http://TU-IP-LOCAL:${PORT}`);
-    console.log(`MongoDB conectado: ${mongoose.connection.host}/${mongoose.connection.name}\n`);
+    console.log(`Landing disponible en http://localhost:${PORT}/index.html\n`);
     console.log('Rutas disponibles:');
     console.log('  GET    /api/pedidos              - listar pedidos');
     console.log('  GET    /api/pedidos?nombre=Joel  - filtrar');
@@ -255,11 +263,23 @@ async function start() {
     console.log('  GET    /api/stats                - estadisticas');
     console.log('  GET    /api/db                   - exportar JSON desde MongoDB\n');
   });
+
+  try {
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000
+    });
+
+    console.log(`MongoDB conectado: ${mongoose.connection.host}/${mongoose.connection.name}\n`);
+  } catch (err) {
+    console.error('MongoDB no esta disponible.');
+    console.error(`URI usada: ${MONGODB_URI}`);
+    console.error(`${err.message}\n`);
+    console.error('La landing se puede visualizar igualmente, pero la API devolvera 503 hasta iniciar MongoDB.\n');
+  }
 }
 
-start().catch(err => {
-  console.error('No se pudo conectar con MongoDB.');
-  console.error(`URI usada: ${MONGODB_URI}`);
+start().catch((err) => {
+  console.error('No se pudo iniciar el servidor.');
   console.error(err.message);
   process.exit(1);
 });

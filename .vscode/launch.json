@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Abrir landing en Chrome",
+            "url": "http://localhost:3000/index.html",
+            "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "Iniciar servidor"
+        }
+    ]
+}

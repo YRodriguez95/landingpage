@@ -149,6 +149,16 @@
       "notas": "pruebamongo1",
       "fecha": "2026-04-30T12:55:04.208Z",
       "estado": "pendiente"
+    },
+    {
+      "id": "TLU-IFIYFH",
+      "nombre": "yoli20",
+      "email": "yoli20@hotmail.com",
+      "plataforma": "PlayStation 4",
+      "edicion": "Estandar",
+      "notas": "slehjefs",
+      "fecha": "2026-04-30T13:09:54.221Z",
+      "estado": "pendiente"
     }
   ]
 }
