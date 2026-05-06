@@ -673,6 +673,7 @@ La funcionalidad backend hace principalmente lo siguiente:
 ### 9.2. Explicacion del funcionamiento de la funcionalidad backend
 
 El backend esta hecho con Node.js, Express y Mongoose. Express crea el servidor HTTP y define las rutas de la API. Mongoose se encarga de conectar con MongoDB y de definir la estructura que debe tener cada pedido.
+IMPORTANTE, desde el movil/tablet y como te comente anteriomente en clase no se pueden registrar los pedidos, lo comento por aqui ya que me dijistes que no importaba, pero que tenia que tenerlo escrito en la documentación.
 
 El archivo principal es `tlou-backend/server.js`. Al arrancar con `npm start`, se ejecuta:
 

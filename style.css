@@ -2870,3 +2870,53 @@ footer {
     padding: 9px;
   }
 }
+
+@media (max-width: 700px) {
+  .race-card {
+    display: grid;
+    grid-template-columns: minmax(96px, 36%) minmax(0, 1fr);
+    height: auto;
+    min-height: 0;
+  }
+
+  .race-photo {
+    width: auto;
+    min-width: 0;
+    height: clamp(150px, 42vw, 220px);
+  }
+
+  .race-summary {
+    width: auto;
+    min-width: 0;
+    padding: clamp(14px, 4vw, 22px);
+    border-right: 0;
+  }
+
+  .race-panel,
+  .race-card:hover .race-panel,
+  .race-card-clicker:hover .race-panel {
+    grid-column: 1 / -1;
+    width: 100%;
+    opacity: 1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: clamp(10px, 3.2vw, 16px);
+    gap: clamp(7px, 2.4vw, 12px);
+    overflow: visible;
+  }
+
+  .race-stat {
+    min-width: 0;
+    padding: clamp(7px, 2.2vw, 10px);
+    border-left: 0;
+    border-top: 1px solid rgba(201, 168, 76, 0.18);
+  }
+}
+
+@media (max-width: 420px) {
+  .race-panel,
+  .race-card:hover .race-panel,
+  .race-card-clicker:hover .race-panel {
+    grid-template-columns: 1fr;
+  }
+}
