@@ -2,7 +2,20 @@
 
 ## 1. Instrucciones de inicio de la pagina web
 
-La pagina web principal se encuentra en el archivo `index.html`. Para iniciarla en local basta con abrir directamente el archivo `index.html` en el navegador.
+La pagina web principal se encuentra en el archivo `index.html`. 
+
+Para poder abrir el archivo `index.html` desde la terminal primero debes  seguir estos pasos:
+1. Escribe en la terminal firebase --version (si da error es que no lo tienes instlado y debes de seguir estos pasos)
+2. Instalar node.js  https://nodejs.org/es/download/current
+3. Cierra el Visual Studio 
+4.  Escribir en el terminal Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned (si te pregunta algo poner S, si no nada)
+5. Cierra el Visual Studio
+6. Escribir en el terminal npm install -g firebase-tools
+7. Como paso opcional para ver si has descargado todo correctamente añade en la terminal node -v
+npm -v
+
+Si va todo correcto para iniciarla en local basta con abrir directamente el archivo `index.html` en el navegador y pulsar F5.
+
 
 La pagina principal carga los estilos desde `style.css` y la logica interactiva desde `script.js`:
 
