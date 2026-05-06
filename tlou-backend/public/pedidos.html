@@ -91,38 +91,36 @@
   </select>
 </div>
 
-<div class="orders-list" id="ordersList"><div class="empty-state">Conectando con el servidor...</div></div>
+<div class="orders-list" id="ordersList"><div class="empty-state">Conectando con Firebase...</div></div>
 
-<div class="status-bar"><div class="dot"></div><span id="statusText">CONECTANDO CON API...</span></div>
+<div class="status-bar"><div class="dot"></div><span id="statusText">CONECTANDO CON FIREBASE...</span></div>
 <div class="toast" id="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="../../firebase-config.js"></script>
 <script>
-  function getApiBase() {
-    const params = new URLSearchParams(window.location.search);
-    const apiHostFromUrl = params.get('apiHost') || params.get('api');
-    const savedApiHost = localStorage.getItem('tlou-api-host');
-
-    if (apiHostFromUrl) {
-      localStorage.setItem('tlou-api-host', apiHostFromUrl);
-      return `http://${apiHostFromUrl}/api`;
-    }
-
-    if (savedApiHost) {
-      return `http://${savedApiHost}/api`;
-    }
-
-    if ((window.location.protocol === 'http:' || window.location.protocol === 'https:') && window.location.port === '3000') {
-      return `${window.location.origin}/api`;
-    }
-
-    if (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-      return `http://${window.location.hostname}:3000/api`;
-    }
-
-    return 'http://localhost:3000/api';
+  function isFirebaseConfigured() {
+    const config = window.TLOU_FIREBASE_CONFIG || {};
+    return Boolean(config.apiKey && !String(config.apiKey).includes('PEGA_AQUI'));
   }
 
-  const API = getApiBase();
+  function initFirebase() {
+    if (!isFirebaseConfigured()) {
+      document.getElementById('statusText').textContent = 'FIREBASE SIN CONFIGURAR';
+      document.getElementById('ordersList').innerHTML = `<div class="empty-state">Firebase no esta configurado<p>Pega tu configuracion en firebase-config.js</p></div>`;
+      return null;
+    }
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(window.TLOU_FIREBASE_CONFIG);
+    }
+
+    document.getElementById('statusText').textContent = 'CONECTADO A FIREBASE - FIRESTORE';
+    return firebase.firestore().collection(window.TLOU_FIREBASE_COLLECTION || 'pedidos');
+  }
+
+  const pedidosCollection = initFirebase();
   let allPedidos = [];
 
   async function load() {
@@ -131,28 +129,31 @@
     const ed     = document.getElementById('fEd').value;
     const est    = document.getElementById('fEst').value;
 
-    const params = new URLSearchParams();
-    if (plat) params.set('plataforma', plat);
-    if (ed)   params.set('edicion', ed);
-    if (est)  params.set('estado', est);
-
     try {
-      const res = await fetch(`${API}/pedidos?${params}`);
-      const { total, pedidos } = await res.json();
+      if (!pedidosCollection) return;
+
+      const snapshot = await pedidosCollection.get();
+      const pedidos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const filteredPedidos = pedidos.filter(p => {
+        if (plat && p.plataforma !== plat) return false;
+        if (ed && p.edicion !== ed) return false;
+        if (est && p.estado !== est) return false;
+        return true;
+      }).sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
       allPedidos = search
-        ? pedidos.filter(p =>
-            p.nombre.toLowerCase().includes(search) ||
-            p.email.toLowerCase().includes(search) ||
-            p.id.toLowerCase().includes(search))
-        : pedidos;
+        ? filteredPedidos.filter(p =>
+            String(p.nombre || '').toLowerCase().includes(search) ||
+            String(p.email || '').toLowerCase().includes(search) ||
+            String(p.id || '').toLowerCase().includes(search))
+        : filteredPedidos;
 
-      document.getElementById('badge').textContent = allPedidos.length + ' de ' + total + ' pedido' + (total===1?'':'s');
-      document.getElementById('statusText').textContent = 'CONECTADO A API - LEYENDO pedidos.json';
+      document.getElementById('badge').textContent = allPedidos.length + ' de ' + pedidos.length + ' pedido' + (pedidos.length===1?'':'s');
+      document.getElementById('statusText').textContent = 'CONECTADO A FIREBASE - LEYENDO FIRESTORE';
       render();
     } catch(e) {
-      document.getElementById('ordersList').innerHTML = `<div class="empty-state">No se puede conectar con el servidor<p>Ejecuta: npm start</p></div>`;
-      document.getElementById('statusText').textContent = 'ERROR - SERVIDOR NO DISPONIBLE';
+      document.getElementById('ordersList').innerHTML = `<div class="empty-state">No se puede conectar con Firebase<p>${e.message}</p></div>`;
+      document.getElementById('statusText').textContent = 'ERROR - FIREBASE NO DISPONIBLE';
     }
   }
 
@@ -189,10 +190,10 @@
 
   async function cambiarEstado(id, estado) {
     try {
-      await fetch(`${API}/pedidos/${id}/estado`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ estado })
+      if (!pedidosCollection) return;
+      await pedidosCollection.doc(id).update({
+        estado,
+        updatedAt: new Date().toISOString()
       });
       showToast(`Pedido ${id} -> ${estado}`);
       load();
@@ -200,10 +201,11 @@
   }
 
   async function eliminar(id) {
-    if (!confirm(`Eliminar el pedido ${id} de pedidos.json?`)) return;
+    if (!confirm(`Eliminar el pedido ${id} de Firebase?`)) return;
     try {
-      await fetch(`${API}/pedidos/${id}`, { method: 'DELETE' });
-      showToast(`Pedido ${id} eliminado de pedidos.json`);
+      if (!pedidosCollection) return;
+      await pedidosCollection.doc(id).delete();
+      showToast(`Pedido ${id} eliminado de Firebase`);
       load();
     } catch(e) { showToast('Error al eliminar'); }
   }

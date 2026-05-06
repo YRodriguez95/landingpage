@@ -1,0 +1,66 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /pedidos/{pedidoId} {
+      allow read: if true;
+      allow create: if isPedidoId(pedidoId) && isValidNewPedido();
+      allow update: if isPedidoId(pedidoId) && isValidPedidoUpdate();
+      allow delete: if isPedidoId(pedidoId);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isPedidoId(pedidoId) {
+      return pedidoId.matches('^TLU-[A-Z0-9]{6}$');
+    }
+
+    function isValidNewPedido() {
+      return request.resource.data.keys().hasOnly([
+        'id',
+        'nombre',
+        'email',
+        'plataforma',
+        'edicion',
+        'notas',
+        'fecha',
+        'estado'
+      ])
+      && request.resource.data.id == request.resource.id
+      && request.resource.data.nombre is string
+      && request.resource.data.nombre.size() >= 3
+      && request.resource.data.email is string
+      && request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$')
+      && request.resource.data.plataforma in [
+        'PlayStation 4',
+        'PlayStation 5',
+        'PC (Steam)',
+        'PC (Epic Games)'
+      ]
+      && request.resource.data.edicion in [
+        'Estandar',
+        'Digital Deluxe',
+        'Edicion Coleccionista',
+        'Remasterizada'
+      ]
+      && (request.resource.data.notas == null || request.resource.data.notas is string)
+      && request.resource.data.fecha is string
+      && request.resource.data.estado == 'pendiente';
+    }
+
+    function isValidPedidoUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'estado',
+        'updatedAt'
+      ])
+      && request.resource.data.estado in [
+        'pendiente',
+        'completado',
+        'cancelado'
+      ]
+      && request.resource.data.updatedAt is string;
+    }
+  }
+}

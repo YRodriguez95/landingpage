@@ -225,12 +225,15 @@
       <p class="footer-hint" id="footerHint">Completa todos los campos para registrar el pedido.</p>
     </div>
   </form>
-  <div class="status-bar"><div class="dot"></div><span id="statusText">CONECTANDO CON API...</span></div>
-  <p class="api-hint" id="apiHint">Si entras desde el movil y no guarda, abre esta pagina usando la IP del PC: `http://TU-IP:3000/tlou-backend/public/indexxx.html` o anade `?apiHost=TU-IP:3000`.</p>
+  <div class="status-bar"><div class="dot"></div><span id="statusText">CONECTANDO CON FIREBASE...</span></div>
+  <p class="api-hint" id="apiHint">Los pedidos se guardaran en Firestore cuando firebase-config.js tenga la configuracion del proyecto.</p>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="../../firebase-config.js"></script>
 <script>
   const canvas = document.getElementById('sporeCanvas');
   const ctx = canvas.getContext('2d');
@@ -407,35 +410,33 @@
   window.addEventListener('resize', resizeScene);
   initScene();
 
-  function getApiBase() {
-    const params = new URLSearchParams(window.location.search);
-    const apiHostFromUrl = params.get('apiHost') || params.get('api');
-    const savedApiHost = localStorage.getItem('tlou-api-host');
-
-    if (apiHostFromUrl) {
-      localStorage.setItem('tlou-api-host', apiHostFromUrl);
-      return `http://${apiHostFromUrl}/api`;
-    }
-
-    if (savedApiHost) {
-      return `http://${savedApiHost}/api`;
-    }
-
-    if ((window.location.protocol === 'http:' || window.location.protocol === 'https:') && window.location.port === '3000') {
-      return `${window.location.origin}/api`;
-    }
-
-    if (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-      return `http://${window.location.hostname}:3000/api`;
-    }
-
-    return 'http://localhost:3000/api';
+  function generateId() {
+    return 'TLU-' + Math.random().toString(36).substring(2, 8).toUpperCase();
   }
 
-  const API = getApiBase();
-  document.getElementById('statusText').textContent = 'API DETECTADA - ' + API;
-  document.getElementById('apiHint').textContent =
-    'Si entras desde el movil y no guarda, abre esta pagina usando la IP del PC: http://TU-IP:3000/tlou-backend/public/indexxx.html o anade ?apiHost=TU-IP:3000.';
+  function isFirebaseConfigured() {
+    const config = window.TLOU_FIREBASE_CONFIG || {};
+    return Boolean(config.apiKey && !String(config.apiKey).includes('PEGA_AQUI'));
+  }
+
+  function initFirebase() {
+    if (!isFirebaseConfigured()) {
+      document.getElementById('statusText').textContent = 'FIREBASE SIN CONFIGURAR';
+      document.getElementById('apiHint').textContent = 'Pega la configuracion de tu proyecto Firebase en firebase-config.js para activar Firestore.';
+      return null;
+    }
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(window.TLOU_FIREBASE_CONFIG);
+    }
+
+    const db = firebase.firestore();
+    document.getElementById('statusText').textContent = 'FIREBASE CONECTADO - FIRESTORE';
+    document.getElementById('apiHint').textContent = 'Los pedidos se guardan directamente en Firestore, coleccion: ' + (window.TLOU_FIREBASE_COLLECTION || 'pedidos') + '.';
+    return db.collection(window.TLOU_FIREBASE_COLLECTION || 'pedidos');
+  }
+
+  const pedidosCollection = initFirebase();
 
   const rules = {
     nombre:     { fn: v => v.trim().length >= 3,                         msg: 'Minimo 3 caracteres.' },
@@ -463,37 +464,42 @@
     btn.disabled = true; btn.textContent = 'Enviando...';
 
     try {
-      const res = await fetch(`${API}/pedidos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nombre:     document.getElementById('nombre').value.trim(),
-          email:      document.getElementById('email').value.trim(),
-          plataforma: document.getElementById('plataforma').value,
-          edicion:    document.getElementById('edicion').value,
-          notas:      document.getElementById('notas').value.trim()
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        // Mostrar errores del servidor en los campos
-        if (data.errors) Object.keys(data.errors).forEach(f => setErr(f, data.errors[f]));
-        document.getElementById('footerHint').textContent = 'Corrige los errores.';
-        document.getElementById('statusText').textContent = 'API ACTIVA - ERROR DE VALIDACION';
+      if (!pedidosCollection) {
+        document.getElementById('footerHint').textContent = 'Firebase no esta configurado todavia.';
+        document.getElementById('statusText').textContent = 'FIREBASE SIN CONFIGURAR';
         return;
       }
 
-      showToast('Pedido ' + data.pedido.id + ' guardado en pedidos.json');
-      document.getElementById('footerHint').textContent = 'Pedido ' + data.pedido.id + ' registrado.';
-      document.getElementById('statusText').textContent = 'API ACTIVA - PEDIDO GUARDADO';
+      let id = generateId();
+      let exists = await pedidosCollection.doc(id).get();
+
+      while (exists.exists) {
+        id = generateId();
+        exists = await pedidosCollection.doc(id).get();
+      }
+
+      const pedido = {
+        id,
+        nombre:     document.getElementById('nombre').value.trim(),
+        email:      document.getElementById('email').value.trim().toLowerCase(),
+        plataforma: document.getElementById('plataforma').value,
+        edicion:    document.getElementById('edicion').value,
+        notas:      document.getElementById('notas').value.trim() || null,
+        fecha:      new Date().toISOString(),
+        estado:     'pendiente'
+      };
+
+      await pedidosCollection.doc(id).set(pedido);
+
+      showToast('Pedido ' + pedido.id + ' guardado en Firebase');
+      document.getElementById('footerHint').textContent = 'Pedido ' + pedido.id + ' registrado.';
+      document.getElementById('statusText').textContent = 'FIREBASE ACTIVO - PEDIDO GUARDADO';
       this.reset();
 
     } catch (err) {
-      document.getElementById('footerHint').textContent = 'No se puede conectar con el servidor.';
-      document.getElementById('statusText').textContent = 'ERROR - NO SE PUEDE CONECTAR A ' + API;
-      showToast('Error: servidor no disponible');
+      document.getElementById('footerHint').textContent = 'No se pudo guardar el pedido en Firebase.';
+      document.getElementById('statusText').textContent = 'ERROR - FIREBASE NO DISPONIBLE';
+      showToast('Error: ' + err.message);
     } finally {
       btn.disabled = false; btn.textContent = 'Confirmar Compra';
     }

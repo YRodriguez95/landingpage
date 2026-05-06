@@ -1,25 +1,8 @@
-# Documentacion de la pagina web
+﻿# Documentacion de la pagina web
 
 ## 1. Instrucciones de inicio de la pagina web
 
-La pagina web principal se encuentra en el archivo `index.html`. Para iniciarla en local hay dos opciones:
-
-1. Abrir directamente el archivo `index.html` en el navegador.
-2. Si se quiere usar tambien el backend de compra, abrir una terminal en la carpeta del proyecto y ejecutar:
-
-```bash
-npm install
-npm start
-```
-
-El comando `npm start` ejecuta el servidor indicado en `package.json`:
-
-```json
-"scripts": {
-  "start": "node tlou-backend/server.js",
-  "dev": "node --watch tlou-backend/server.js"
-}
-```
+La pagina web principal se encuentra en el archivo `index.html`. Para iniciarla en local basta con abrir directamente el archivo `index.html` en el navegador.
 
 La pagina principal carga los estilos desde `style.css` y la logica interactiva desde `script.js`:
 
@@ -28,6 +11,8 @@ La pagina principal carga los estilos desde `style.css` y la logica interactiva 
 <script src="script.js"></script>
 ```
 
+La parte de compra y gestion de pedidos funciona como frontend estatico conectado a Firebase Firestore mediante `firebase-config.js`.
+
 ## 2. Enumeracion de funcionalidades
 
 1. Pasar los personajes de normal a zombie.
@@ -35,7 +20,7 @@ La pagina principal carga los estilos desde `style.css` y la logica interactiva 
 3. Cambio de la palabra `Caracteristicas` a `Zombies` y `Etapas`.
 4. Zombies en 3D mediante secuencia animada de imagenes.
 5. Recuadro que cambia de color al pulsarlo o interactuar con el.
-6. Caja fuerte de acceso. (CONTRASEÑA 11 10 95)
+6. Caja fuerte de acceso. (CONTRASEÃ‘A 11 10 95)
 7. Flecha lateral para volver al panel superior de la pagina.
 
 ## 3. Funcionalidades
@@ -758,373 +743,178 @@ Estado visible del boton:
 
 La clase `is-ready` muestra el boton cuando la pagina ya esta preparada. `opacity: 1` lo hace visible, `visibility: visible` permite que se vea en pantalla, `transform` lo coloca en su posicion final y `pointer-events: auto` permite que pueda recibir clics.
 
-## 10. Funcionalidad Backend
+## 10. Funcionalidad Firebase / Firestore
 
-### 10.1. Descripcion del comportamiento de la funcionalidad backend
+### 10.1. Descripcion del comportamiento de la funcionalidad Firebase
 
-El backend permite registrar, consultar, modificar y eliminar pedidos de compra de The Last of Us. Funciona como una API REST conectada a MongoDB. La pagina de compra (`tlou-backend/public/indexxx.html`) envia los datos del formulario al servidor, y la pagina de pedidos (`tlou-backend/public/pedidos.html`) muestra los pedidos guardados, permite filtrarlos, cambiar su estado o eliminarlos.
+La funcionalidad Firebase permite registrar, consultar, modificar y eliminar pedidos de compra de The Last of Us sin usar un servidor propio. La pagina de compra (`tlou-backend/public/indexxx.html`) guarda cada pedido directamente en Firebase Firestore, y la pagina de pedidos (`tlou-backend/public/pedidos.html`) lee esa misma coleccion para mostrar los registros, filtrarlos, cambiar su estado o eliminarlos.
 
-La funcionalidad backend hace principalmente lo siguiente:
+La funcionalidad hace principalmente lo siguiente:
 
 1. Recibe pedidos nuevos desde el formulario de compra.
-2. Valida que los datos obligatorios sean correctos.
-3. Guarda los pedidos en una base de datos MongoDB.
-4. Lista pedidos guardados y permite filtrarlos.
-5. Cambia el estado de un pedido a `pendiente`, `completado` o `cancelado`.
-6. Elimina pedidos.
-7. Devuelve estadisticas generales de los pedidos.
-8. Los pedidos son registrados en pedidos.json
+2. Valida en el navegador que los datos obligatorios sean correctos.
+3. Genera un identificador de pedido con formato `TLU-XXXXXX`.
+4. Guarda los pedidos en la coleccion `pedidos` de Firestore.
+5. Lista los pedidos guardados y permite filtrarlos por texto, plataforma, edicion y estado.
+6. Cambia el estado de un pedido a `pendiente`, `completado` o `cancelado`.
+7. Elimina pedidos desde el panel de gestion.
+8. Protege la base de datos con reglas de Firestore definidas en `firestore.rules`.
 
-### 10.2. Explicacion del funcionamiento de la funcionalidad backend
+### 10.2. Explicacion del funcionamiento de la funcionalidad Firebase
 
-El backend esta hecho con Node.js, Express y Mongoose. Express crea el servidor HTTP y define las rutas de la API. Mongoose se encarga de conectar con MongoDB y de definir la estructura que debe tener cada pedido.
-IMPORTANTE, desde el movil/tablet y como te comente anteriomente en clase no se pueden registrar los pedidos, lo comento por aqui ya que me dijistes que no importaba, pero que tenia que tenerlo escrito en la documentación.
+La conexion con Firebase se configura en `firebase-config.js`. Ese archivo guarda los datos del proyecto (`apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, `appId` y `measurementId`) y tambien define el nombre de la coleccion usada por la aplicacion:
 
-El archivo principal es `tlou-backend/server.js`. Al arrancar con `npm start`, se ejecuta:
+```js
+window.TLOU_FIREBASE_COLLECTION = "pedidos";
+```
 
-```json
-"scripts": {
-  "start": "node tlou-backend/server.js",
-  "dev": "node --watch tlou-backend/server.js"
+Las paginas de compra y pedidos cargan Firebase desde los scripts oficiales del SDK web en modo `compat`:
+
+```html
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="../../firebase-config.js"></script>
+```
+
+Despues, JavaScript inicializa Firebase con `firebase.initializeApp()` y obtiene una referencia a Firestore con `firebase.firestore()`. A partir de ahi, las operaciones se hacen directamente sobre la coleccion `pedidos`, sin rutas HTTP propias y sin archivos JSON locales.
+
+El proyecto tambien incluye `firebase.json`, que configura Firebase Hosting y enlaza las reglas de Firestore. El archivo `.firebaserc` indica el proyecto Firebase usado por defecto: `the-last-of-us-652da`.
+
+### 10.3. Fragmentos de codigo relevantes de la funcionalidad Firebase
+
+Configuracion de Firebase:
+
+```js
+window.TLOU_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCVNWdK6s-2w7IkTWr9Fv9z6Vs_qbzeoYI",
+  authDomain: "the-last-of-us-652da.firebaseapp.com",
+  projectId: "the-last-of-us-652da",
+  storageBucket: "the-last-of-us-652da.firebasestorage.app",
+  messagingSenderId: "1061817054660",
+  appId: "1:1061817054660:web:1d38f2b83266ff6b10a091",
+  measurementId: "G-EZE9D34XSH"
+};
+
+window.TLOU_FIREBASE_COLLECTION = "pedidos";
+```
+
+Este fragmento identifica el proyecto Firebase al que se conecta la pagina. `projectId` indica el proyecto concreto, y `TLOU_FIREBASE_COLLECTION` centraliza el nombre de la coleccion donde se guardan los pedidos.
+
+Comprobacion e inicializacion de Firebase:
+
+```js
+function isFirebaseConfigured() {
+  const config = window.TLOU_FIREBASE_CONFIG || {};
+  return Boolean(config.apiKey && !String(config.apiKey).includes('PEGA_AQUI'));
 }
+
+function initFirebase() {
+  if (!isFirebaseConfigured()) {
+    document.getElementById('statusText').textContent = 'FIREBASE SIN CONFIGURAR';
+    return null;
+  }
+
+  if (!firebase.apps.length) {
+    firebase.initializeApp(window.TLOU_FIREBASE_CONFIG);
+  }
+
+  const db = firebase.firestore();
+  return db.collection(window.TLOU_FIREBASE_COLLECTION || 'pedidos');
+}
+
+const pedidosCollection = initFirebase();
 ```
 
-El servidor se inicia en el puerto `3000` si no se indica otro puerto. La conexion a MongoDB usa por defecto la direccion local `mongodb://127.0.0.1:27017/tlou`, aunque tambien se puede cambiar mediante la variable de entorno `MONGODB_URI`.
+`isFirebaseConfigured()` evita intentar conectar si faltan los datos del proyecto. `firebase.initializeApp()` arranca Firebase una sola vez. `firebase.firestore()` obtiene la base de datos y `db.collection(...)` devuelve la coleccion que se usara para crear, leer, actualizar y borrar pedidos.
 
-La comunicacion entre frontend y backend se hace con `fetch()`. Por ejemplo, cuando el usuario confirma una compra, el formulario manda una peticion `POST` a `/api/pedidos` con los datos en formato JSON. El servidor valida esos datos y, si son correctos, crea un documento nuevo en MongoDB.
-
-### 10.3. Fragmentos de codigo relevantes de la funcionalidad backend
-
-Importacion de dependencias y configuracion inicial:
-
-```js
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const path = require('path');
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-const HOST = '0.0.0.0';
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/tlou';
-const ROOT = path.join(__dirname, '..');
-```
-
-`require()` importa modulos de Node.js. `express` sirve para crear el servidor y las rutas. `cors` permite que el frontend pueda hacer peticiones al backend. `mongoose` conecta con MongoDB. `path` ayuda a crear rutas de archivos compatibles con el sistema operativo.
-
-`const` declara variables constantes. `process.env.PORT || 3000` significa: usa el puerto indicado en la variable de entorno `PORT`; si no existe, usa `3000`. `path.join(__dirname, '..')` construye la ruta de la carpeta raiz del proyecto.
-
-Middlewares del servidor:
-
-```js
-app.use(cors());
-app.use(express.json());
-app.use(express.static(ROOT));
-app.use(express.static(path.join(__dirname, 'public')));
-```
-
-`app.use()` registra middlewares, que son funciones que Express ejecuta antes de llegar a las rutas. `cors()` activa CORS. `express.json()` permite leer cuerpos de peticiones en formato JSON. `express.static()` sirve archivos estaticos, como HTML, CSS, JS e imagenes.
-
-Esquema de pedido con Mongoose:
-
-```js
-const pedidoSchema = new mongoose.Schema({
-  id: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
-  },
-  nombre: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  email: {
-    type: String,
-    required: true,
-    trim: true,
-    lowercase: true
-  },
-  plataforma: {
-    type: String,
-    required: true
-  },
-  edicion: {
-    type: String,
-    required: true
-  },
-  notas: {
-    type: String,
-    default: null
-  },
-  fecha: {
-    type: Date,
-    default: Date.now
-  },
-  estado: {
-    type: String,
-    enum: ['pendiente', 'completado', 'cancelado'],
-    default: 'pendiente'
-  },
-  updatedAt: Date
-}, {
-  collection: 'pedidos',
-  versionKey: false
-});
-
-const Pedido = mongoose.model('Pedido', pedidoSchema);
-```
-
-`new mongoose.Schema()` define la estructura de los documentos que se guardan en MongoDB. Cada propiedad indica el tipo de dato y sus reglas. Por ejemplo, `required: true` obliga a que el campo exista. `unique: true` evita IDs duplicados. `trim: true` elimina espacios sobrantes al principio y al final. `lowercase: true` guarda el email en minusculas. `enum` limita el valor de `estado` a tres opciones validas.
-
-`mongoose.model('Pedido', pedidoSchema)` crea el modelo `Pedido`. Ese modelo permite usar metodos como `find()`, `create()`, `findOneAndUpdate()` y `findOneAndDelete()`.
-
-Generacion de identificador y limpieza de datos:
+Generacion de identificador:
 
 ```js
 function generateId() {
   return 'TLU-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
-
-function cleanPedido(pedido) {
-  const data = typeof pedido.toJSON === 'function' ? pedido.toJSON() : { ...pedido };
-  delete data._id;
-  delete data.__v;
-  return data;
-}
 ```
 
-`generateId()` crea un codigo de pedido que empieza por `TLU-`. `Math.random()` genera un numero aleatorio. `.toString(36)` lo convierte a letras y numeros. `.substring(2, 8)` recorta una parte del texto generado. `.toUpperCase()` lo pasa a mayusculas.
+Esta funcion crea codigos como `TLU-A1B2C3`. `Math.random()` genera un valor aleatorio, `toString(36)` lo convierte a letras y numeros, `substring(2, 8)` recorta seis caracteres y `toUpperCase()` los pasa a mayusculas.
 
-`cleanPedido()` prepara el objeto antes de enviarlo al frontend. Si el pedido viene de Mongoose, usa `toJSON()`. Si no, copia el objeto con `{ ...pedido }`. Luego elimina `_id` y `__v`, que son campos internos de MongoDB/Mongoose y no son necesarios para el usuario.
-
-Validacion de datos:
+Creacion de un pedido en Firestore:
 
 ```js
-function validate(body) {
-  const errors = {};
+let id = generateId();
+let exists = await pedidosCollection.doc(id).get();
 
-  if (!body.nombre || body.nombre.trim().length < 3) {
-    errors.nombre = 'El nombre debe tener al menos 3 caracteres.';
-  }
-
-  if (!body.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
-    errors.email = 'El email no es valido.';
-  }
-
-  if (!body.plataforma) {
-    errors.plataforma = 'La plataforma es obligatoria.';
-  }
-
-  if (!body.edicion) {
-    errors.edicion = 'La edicion es obligatoria.';
-  }
-
-  return errors;
-}
-```
-
-Esta funcion recibe `body`, que contiene los datos enviados por el frontend. Crea un objeto `errors` y va anadiendo mensajes si algun campo no cumple las reglas. La expresion regular `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` comprueba que el email tenga una estructura valida: texto antes de `@`, texto despues de `@`, punto y dominio.
-
-La sintaxis `if (...) { ... }` ejecuta el bloque solo si la condicion se cumple. `return errors` devuelve todos los errores encontrados.
-
-Control de rutas asincronas:
-
-```js
-function asyncRoute(handler) {
-  return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
-}
-```
-
-Esta funcion envuelve rutas asincronas para capturar errores automaticamente. `handler` es la funcion de la ruta. `req` contiene la peticion, `res` sirve para responder y `next` pasa el error al manejador de errores de Express. `Promise.resolve(...).catch(next)` evita repetir bloques `try/catch` en cada ruta.
-
-Ruta para listar pedidos:
-
-```js
-app.get('/api/pedidos', asyncRoute(async (req, res) => {
-  const { nombre, plataforma, edicion, estado } = req.query;
-  const query = {};
-
-  if (nombre) {
-    query.nombre = { $regex: nombre, $options: 'i' };
-  }
-
-  if (plataforma) {
-    query.plataforma = plataforma;
-  }
-
-  if (edicion) {
-    query.edicion = edicion;
-  }
-
-  if (estado) {
-    query.estado = estado;
-  }
-
-  const pedidos = await Pedido.find(query).sort({ fecha: 1 });
-  res.json({ total: pedidos.length, pedidos: pedidos.map(cleanPedido) });
-}));
-```
-
-`app.get()` define una ruta que responde a peticiones GET. `req.query` contiene los parametros escritos en la URL, por ejemplo `/api/pedidos?estado=pendiente`. La sintaxis `{ nombre, plataforma, edicion, estado }` extrae esos valores del objeto.
-
-`query` es el filtro que se envia a MongoDB. `$regex` permite buscar nombres de forma parcial y `$options: 'i'` hace que no distinga entre mayusculas y minusculas. `await Pedido.find(query)` espera a que MongoDB devuelva los pedidos. `.sort({ fecha: 1 })` los ordena por fecha ascendente. `res.json()` responde al cliente en formato JSON.
-
-Ruta para crear un pedido:
-
-```js
-app.post('/api/pedidos', asyncRoute(async (req, res) => {
-  const errors = validate(req.body);
-
-  if (Object.keys(errors).length) {
-    return res.status(400).json({ errors });
-  }
-
-  const pedido = await Pedido.create({
-    id: generateId(),
-    nombre: req.body.nombre.trim(),
-    email: req.body.email.trim().toLowerCase(),
-    plataforma: req.body.plataforma,
-    edicion: req.body.edicion,
-    notas: req.body.notas?.trim() || null,
-    estado: 'pendiente'
-  });
-
-  res.status(201).json({
-    message: 'Pedido registrado correctamente.',
-    pedido: cleanPedido(pedido)
-  });
-}));
-```
-
-`app.post()` define una ruta para crear datos. `req.body` contiene el JSON enviado desde el formulario. `Object.keys(errors).length` comprueba si el objeto de errores tiene alguna propiedad. Si hay errores, `res.status(400)` responde con codigo HTTP 400, que significa solicitud incorrecta.
-
-`Pedido.create()` inserta el pedido en MongoDB. `await` espera a que termine la operacion. `req.body.notas?.trim() || null` usa encadenamiento opcional: si `notas` existe, aplica `trim()`; si no existe o queda vacio, guarda `null`. `res.status(201)` indica que el recurso se ha creado correctamente.
-
-Ruta para cambiar el estado de un pedido:
-
-```js
-app.patch('/api/pedidos/:id/estado', asyncRoute(async (req, res) => {
-  const estadosValidos = ['pendiente', 'completado', 'cancelado'];
-  const { estado } = req.body;
-
-  if (!estadosValidos.includes(estado)) {
-    return res.status(400).json({ error: `Estado invalido. Usa: ${estadosValidos.join(', ')}` });
-  }
-
-  const pedido = await Pedido.findOneAndUpdate(
-    { id: req.params.id },
-    { estado, updatedAt: new Date() },
-    { new: true }
-  );
-
-  if (!pedido) {
-    return res.status(404).json({ error: 'Pedido no encontrado.' });
-  }
-
-  res.json({ message: 'Estado actualizado.', pedido: cleanPedido(pedido) });
-}));
-```
-
-`app.patch()` se usa para modificar parcialmente un recurso. `:id` es un parametro dinamico de la URL; Express lo guarda en `req.params.id`. `includes(estado)` comprueba si el estado enviado pertenece a la lista de estados validos.
-
-`findOneAndUpdate()` busca un pedido por su `id` y actualiza su estado. El tercer argumento `{ new: true }` indica que debe devolver el documento ya actualizado. `new Date()` guarda la fecha exacta de actualizacion.
-
-Ruta para eliminar pedidos:
-
-```js
-app.delete('/api/pedidos/:id', asyncRoute(async (req, res) => {
-  const eliminado = await Pedido.findOneAndDelete({ id: req.params.id });
-
-  if (!eliminado) {
-    return res.status(404).json({ error: 'Pedido no encontrado.' });
-  }
-
-  res.json({
-    message: `Pedido ${eliminado.id} eliminado.`,
-    pedido: cleanPedido(eliminado)
-  });
-}));
-```
-
-`app.delete()` define una ruta de eliminacion. `findOneAndDelete()` busca el pedido por ID y lo borra de MongoDB. Si no existe, devuelve `404`. Si existe, responde con un mensaje y con los datos del pedido eliminado.
-
-Conexion con MongoDB y arranque del servidor:
-
-```js
-async function start() {
-  await mongoose.connect(MONGODB_URI, {
-    serverSelectionTimeoutMS: 5000
-  });
-
-  app.listen(PORT, HOST, () => {
-    console.log(`TLOU Backend corriendo en http://localhost:${PORT}`);
-    console.log(`MongoDB conectado: ${mongoose.connection.host}/${mongoose.connection.name}`);
-  });
+while (exists.exists) {
+  id = generateId();
+  exists = await pedidosCollection.doc(id).get();
 }
 
-start().catch(err => {
-  console.error('No se pudo conectar con MongoDB.');
-  console.error(`URI usada: ${MONGODB_URI}`);
-  console.error(err.message);
-  process.exit(1);
+const pedido = {
+  id,
+  nombre: document.getElementById('nombre').value.trim(),
+  email: document.getElementById('email').value.trim().toLowerCase(),
+  plataforma: document.getElementById('plataforma').value,
+  edicion: document.getElementById('edicion').value,
+  notas: document.getElementById('notas').value.trim() || null,
+  fecha: new Date().toISOString(),
+  estado: 'pendiente'
+};
+
+await pedidosCollection.doc(id).set(pedido);
+```
+
+Primero se genera un identificador y se comprueba con `.get()` que no exista ya un documento con ese ID. Si existiera, se genera otro. Despues se construye el objeto `pedido` con los valores del formulario. Finalmente, `.doc(id).set(pedido)` crea el documento en Firestore usando el identificador como nombre del documento.
+
+Lectura y filtrado de pedidos:
+
+```js
+const snapshot = await pedidosCollection.get();
+const pedidos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+const filteredPedidos = pedidos.filter(p => {
+  if (plat && p.plataforma !== plat) return false;
+  if (ed && p.edicion !== ed) return false;
+  if (est && p.estado !== est) return false;
+  return true;
+}).sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+```
+
+`pedidosCollection.get()` lee todos los documentos de la coleccion. `snapshot.docs.map(...)` convierte cada documento de Firestore en un objeto JavaScript normal. Despues, `filter()` aplica los filtros seleccionados por el usuario y `sort()` ordena los pedidos por fecha.
+
+Actualizacion del estado:
+
+```js
+await pedidosCollection.doc(id).update({
+  estado,
+  updatedAt: new Date().toISOString()
 });
 ```
 
-`async function start()` declara una funcion asincrona. `mongoose.connect()` abre la conexion con MongoDB. `serverSelectionTimeoutMS: 5000` limita a 5 segundos el tiempo de espera para encontrar el servidor de base de datos.
+`update()` modifica solo los campos indicados. En este caso cambia el `estado` y guarda la fecha de actualizacion en `updatedAt`, sin tocar el resto de datos del pedido.
 
-`app.listen()` inicia el servidor Express. Recibe el puerto, el host y una funcion callback que se ejecuta cuando el servidor ya esta escuchando. `start().catch(...)` captura errores de conexion. `process.exit(1)` cierra el proceso indicando que hubo un fallo.
-
-Envio de pedido desde el frontend:
+Eliminacion de un pedido:
 
 ```js
-const res = await fetch(`${API}/pedidos`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    nombre: document.getElementById('nombre').value.trim(),
-    email: document.getElementById('email').value.trim(),
-    plataforma: document.getElementById('plataforma').value,
-    edicion: document.getElementById('edicion').value,
-    notas: document.getElementById('notas').value.trim()
-  })
-});
-
-const data = await res.json();
+await pedidosCollection.doc(id).delete();
 ```
 
-Este fragmento esta en `tlou-backend/public/indexxx.html`. `fetch()` realiza una peticion HTTP al backend. `method: 'POST'` indica que se esta creando un pedido. `headers` especifica que el cuerpo va en JSON. `JSON.stringify()` convierte el objeto JavaScript en texto JSON para enviarlo al servidor. `await res.json()` convierte la respuesta JSON del backend en un objeto JavaScript.
+`delete()` elimina de Firestore el documento cuyo identificador coincide con el pedido seleccionado.
 
-Lectura y renderizado de pedidos:
+Reglas de seguridad de Firestore:
 
 ```js
-const res = await fetch(`${API}/pedidos?${params}`);
-const { total, pedidos } = await res.json();
+match /pedidos/{pedidoId} {
+  allow read: if true;
+  allow create: if isPedidoId(pedidoId) && isValidNewPedido();
+  allow update: if isPedidoId(pedidoId) && isValidPedidoUpdate();
+  allow delete: if isPedidoId(pedidoId);
+}
 
-allPedidos = search
-  ? pedidos.filter(p =>
-      p.nombre.toLowerCase().includes(search) ||
-      p.email.toLowerCase().includes(search) ||
-      p.id.toLowerCase().includes(search))
-  : pedidos;
+match /{document=**} {
+  allow read, write: if false;
+}
 ```
 
-Este fragmento esta en `tlou-backend/public/pedidos.html`. Hace una peticion GET para obtener pedidos. La sintaxis `{ total, pedidos } = await res.json()` desestructura la respuesta y extrae directamente esas dos propiedades. `filter()` crea una lista nueva con los pedidos que coinciden con la busqueda. `includes()` comprueba si un texto contiene otro texto.
-
-Actualizacion y eliminacion desde el frontend:
-
-```js
-await fetch(`${API}/pedidos/${id}/estado`, {
-  method: 'PATCH',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ estado })
-});
-
-await fetch(`${API}/pedidos/${id}`, { method: 'DELETE' });
-```
-
-La primera peticion cambia el estado de un pedido usando `PATCH`. La segunda elimina un pedido usando `DELETE`. En ambos casos se usa una URL con el `id` del pedido para que el backend sepa sobre que documento debe actuar.
+Estas reglas permiten trabajar con la coleccion `pedidos`, pero bloquean cualquier otra coleccion. Las funciones `isPedidoId`, `isValidNewPedido` e `isValidPedidoUpdate` revisan que los IDs y los campos tengan la forma esperada antes de permitir escritura en la base de datos.
 
 ## 11. Responsividad
 
@@ -1370,3 +1160,4 @@ Ajustes especificos para movil:
 ```
 
 Esta segunda media query se aplica en pantallas de 520px o menos. No cambia la estructura, solo reduce aun mas los espacios y textos para que el diseno conserve la misma forma en moviles estrechos.
+
