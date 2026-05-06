@@ -2,6 +2,19 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Ver pedidos Firebase en VS Code",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}\\scripts\\sync-pedidos-vscode.ps1"
+            ],
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
             "label": "Iniciar servidor",
             "type": "npm",
             "script": "dev",

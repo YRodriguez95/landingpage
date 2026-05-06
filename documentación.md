@@ -11,7 +11,7 @@ La pagina principal carga los estilos desde `style.css` y la logica interactiva 
 <script src="script.js"></script>
 ```
 
-La parte de compra y gestion de pedidos funciona como frontend estatico conectado a Firebase Firestore mediante `firebase-config.js`.
+La parte de compra y gestion de pedidos funciona como frontend estatico conectado a Firebase Firestore mediante `firebase-config.js`. Ademas, los pedidos pueden reflejarse en VS Code mediante `pedidos-vscode.json`, que se genera desde un script local de sincronizacion.
 
 ## 2. Enumeracion de funcionalidades
 
@@ -749,16 +749,19 @@ La clase `is-ready` muestra el boton cuando la pagina ya esta preparada. `opacit
 
 La funcionalidad Firebase permite registrar, consultar, modificar y eliminar pedidos de compra de The Last of Us sin usar un servidor propio. La pagina de compra (`tlou-backend/public/indexxx.html`) guarda cada pedido directamente en Firebase Firestore, y la pagina de pedidos (`tlou-backend/public/pedidos.html`) lee esa misma coleccion para mostrar los registros, filtrarlos, cambiar su estado o eliminarlos.
 
+Ademas de guardarse en Firestore, los pedidos tambien pueden verse reflejados dentro del proyecto en VS Code. Para ello se usa el script local `scripts/sync-pedidos-vscode.ps1`, que consulta la coleccion `pedidos` de Firebase y genera los archivos `pedidos-vscode.json` y `pedidos-vscode.md`. De esta forma, Firebase sigue siendo la base de datos principal, pero VS Code tambien muestra una copia local actualizada para consultar los pedidos sin entrar al panel web.
+
 La funcionalidad hace principalmente lo siguiente:
 
 1. Recibe pedidos nuevos desde el formulario de compra.
 2. Valida en el navegador que los datos obligatorios sean correctos.
 3. Genera un identificador de pedido con formato `TLU-XXXXXX`.
 4. Guarda los pedidos en la coleccion `pedidos` de Firestore.
-5. Lista los pedidos guardados y permite filtrarlos por texto, plataforma, edicion y estado.
-6. Cambia el estado de un pedido a `pendiente`, `completado` o `cancelado`.
-7. Elimina pedidos desde el panel de gestion.
-8. Protege la base de datos con reglas de Firestore definidas en `firestore.rules`.
+5. Sincroniza los pedidos con `pedidos-vscode.json` y `pedidos-vscode.md` cuando se ejecuta la tarea de VS Code.
+6. Lista los pedidos guardados y permite filtrarlos por texto, plataforma, edicion y estado.
+7. Cambia el estado de un pedido a `pendiente`, `completado` o `cancelado`.
+8. Elimina pedidos desde el panel de gestion.
+9. Protege la base de datos con reglas de Firestore definidas en `firestore.rules`.
 
 ### 10.2. Explicacion del funcionamiento de la funcionalidad Firebase
 
@@ -776,9 +779,22 @@ Las paginas de compra y pedidos cargan Firebase desde los scripts oficiales del 
 <script src="../../firebase-config.js"></script>
 ```
 
-Despues, JavaScript inicializa Firebase con `firebase.initializeApp()` y obtiene una referencia a Firestore con `firebase.firestore()`. A partir de ahi, las operaciones se hacen directamente sobre la coleccion `pedidos`, sin rutas HTTP propias y sin archivos JSON locales.
+Despues, JavaScript inicializa Firebase con `firebase.initializeApp()` y obtiene una referencia a Firestore con `firebase.firestore()`. A partir de ahi, las operaciones de la web se hacen directamente sobre la coleccion `pedidos`, sin rutas HTTP propias. El archivo `pedidos-vscode.json` no sustituye a Firebase ni recibe datos directamente desde el navegador: se crea despues mediante un script local que lee Firestore y vuelca los pedidos en el proyecto.
 
 El proyecto tambien incluye `firebase.json`, que configura Firebase Hosting y enlaza las reglas de Firestore. El archivo `.firebaserc` indica el proyecto Firebase usado por defecto: `the-last-of-us-652da`.
+
+Para ver los pedidos en VS Code se usa la tarea `Ver pedidos Firebase en VS Code`, definida en `.vscode/tasks.json`. Esa tarea ejecuta `scripts/sync-pedidos-vscode.ps1`, consulta Firebase cada pocos segundos y actualiza dos archivos:
+
+1. `pedidos-vscode.json`: copia estructurada de los pedidos, util para revisar los datos como JSON.
+2. `pedidos-vscode.md`: version legible en Markdown, util para ver los pedidos de forma mas clara dentro del editor.
+
+El flujo completo queda asi:
+
+1. El usuario rellena el formulario de compra.
+2. La pagina crea el pedido en Firestore.
+3. La tarea de VS Code consulta Firestore.
+4. El script local actualiza `pedidos-vscode.json` y `pedidos-vscode.md`.
+5. VS Code muestra esos archivos locales como reflejo de los datos que existen en Firebase.
 
 ### 10.3. Fragmentos de codigo relevantes de la funcionalidad Firebase
 
@@ -898,6 +914,34 @@ await pedidosCollection.doc(id).delete();
 ```
 
 `delete()` elimina de Firestore el documento cuyo identificador coincide con el pedido seleccionado.
+
+Sincronizacion local para VS Code:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\sync-pedidos-vscode.ps1
+```
+
+Este comando ejecuta el monitor local de pedidos. El script lee `firebase-config.js` para obtener `projectId`, `apiKey` y el nombre de la coleccion. Despues llama a la API REST de Firestore, convierte los documentos recibidos en objetos normales y genera `pedidos-vscode.json` con la lista de pedidos. Tambien genera `pedidos-vscode.md`, que contiene la misma informacion en un formato mas facil de leer.
+
+La tarea de VS Code que lanza este script es:
+
+```json
+{
+  "label": "Ver pedidos Firebase en VS Code",
+  "type": "shell",
+  "command": "powershell",
+  "args": [
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "${workspaceFolder}\\scripts\\sync-pedidos-vscode.ps1"
+  ],
+  "isBackground": true,
+  "problemMatcher": []
+}
+```
+
+Gracias a esta tarea, cuando se registra un pedido nuevo en Firebase, VS Code puede reflejarlo automaticamente en `pedidos-vscode.json` mientras el monitor este ejecutandose. Si la tarea no esta abierta, el pedido queda igualmente guardado en Firebase, pero el archivo local se actualizara la proxima vez que se ejecute el script.
 
 Reglas de seguridad de Firestore:
 
