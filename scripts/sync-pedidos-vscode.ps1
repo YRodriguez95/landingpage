@@ -146,6 +146,9 @@ function Sync-Pedidos {
   Write-Host "Pedidos sincronizados: $($pedidos.Count). Archivos: pedidos-vscode.json y pedidos-vscode.md"
 }
 
+$modeText = if ($Once) { "una sincronizacion" } else { "monitor continuo" }
+Write-Host "Iniciando $modeText de pedidos Firebase para VS Code..."
+
 do {
   try {
     Sync-Pedidos

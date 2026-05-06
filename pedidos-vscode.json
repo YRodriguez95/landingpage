@@ -1,26 +1,46 @@
 ﻿{
-    "actualizado":  "2026-05-06 13:20:11",
-    "total":  2,
+    "actualizado":  "2026-05-06 13:29:55",
+    "total":  4,
     "pedidos":  [
                     {
-                        "plataforma":  "PlayStation 4",
-                        "fecha":  "2026-05-06T11:12:45.627Z",
-                        "id":  "TLU-446EFK",
+                        "edicion":  "Edicion Coleccionista",
+                        "nombre":  "Pruebamovil",
+                        "id":  "TLU-57N7OT",
                         "estado":  "pendiente",
-                        "nombre":  "pruebapabloponmebuenanota",
-                        "edicion":  "Estandar",
-                        "notas":  "pablo se buena gente y ponme buena nota :)",
-                        "email":  "pabloponmeun10@hotmail.com"
+                        "notas":  "Prueba movil",
+                        "email":  "pruebamovil@hotmail.con",
+                        "plataforma":  "PC (Steam)",
+                        "fecha":  "2026-05-06T11:27:42.890Z"
                     },
                     {
-                        "edicion":  "Estandar",
-                        "notas":  "pruebafirebase",
-                        "email":  "pruebafirebase@hotmail.com",
+                        "notas":  "se buencha ^^",
                         "estado":  "pendiente",
-                        "nombre":  "pruebafirebase",
+                        "id":  "TLU-OHWLJZ",
+                        "nombre":  "ponmeun10",
+                        "edicion":  "Estandar",
+                        "fecha":  "2026-05-06T11:21:40.556Z",
                         "plataforma":  "PlayStation 4",
+                        "email":  "ponmeun10@hotmail.com"
+                    },
+                    {
+                        "fecha":  "2026-05-06T11:12:45.627Z",
+                        "plataforma":  "PlayStation 4",
+                        "email":  "pabloponmeun10@hotmail.com",
+                        "notas":  "pablo se buena gente y ponme buena nota :)",
+                        "estado":  "pendiente",
+                        "nombre":  "pruebapabloponmebuenanota",
+                        "id":  "TLU-446EFK",
+                        "edicion":  "Estandar"
+                    },
+                    {
                         "fecha":  "2026-05-06T10:29:23.968Z",
-                        "id":  "TLU-5WH7F6"
+                        "email":  "pruebafirebase@hotmail.com",
+                        "plataforma":  "PlayStation 4",
+                        "estado":  "pendiente",
+                        "notas":  "pruebafirebase",
+                        "edicion":  "Estandar",
+                        "id":  "TLU-5WH7F6",
+                        "nombre":  "pruebafirebase"
                     }
                 ]
 }

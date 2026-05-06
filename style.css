@@ -486,6 +486,12 @@ nav {
   text-shadow: 0 0 8px #51e37d, 0 0 20px #51e37d, 0 0 40px #51e37daa;
 }
 
+#personajes,
+#zombies,
+#safeLock {
+  scroll-margin-top: 118px;
+}
+
 /* ══════════════════════════════════════════
    TARJETAS DE PERSONAJE
 ══════════════════════════════════════════ */

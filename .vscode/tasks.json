@@ -5,6 +5,7 @@
             "label": "Ver pedidos Firebase en VS Code",
             "type": "shell",
             "command": "powershell",
+            "detail": "Sincroniza Firestore con pedidos-vscode.json y pedidos-vscode.md",
             "args": [
                 "-ExecutionPolicy",
                 "Bypass",
@@ -12,6 +13,14 @@
                 "${workspaceFolder}\\scripts\\sync-pedidos-vscode.ps1"
             ],
             "isBackground": true,
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "presentation": {
+                "reveal": "silent",
+                "panel": "dedicated",
+                "clear": false
+            },
             "problemMatcher": []
         },
         {
