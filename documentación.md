@@ -36,6 +36,7 @@ La pagina principal carga los estilos desde `style.css` y la logica interactiva 
 4. Zombies en 3D mediante secuencia animada de imagenes.
 5. Recuadro que cambia de color al pulsarlo o interactuar con el.
 6. Caja fuerte de acceso. (CONTRASEÑA 11 10 95)
+7. Flecha lateral para volver al panel superior de la pagina.
 
 ## 3. Funcionalidades
 
@@ -418,7 +419,7 @@ La funcionalidad se construye con tres partes:
 
 Cuando se envia el formulario, JavaScript evita que la pagina se recargue, recoge los tres valores escritos, los formatea a dos cifras y los compara con el codigo correcto. Si todos los valores coinciden, se muestra el contenido protegido. Si no coinciden, aumenta el contador de intentos fallidos.
 
-### 8.4 Fragmentos de codigo relevantes
+### 8.3 Fragmentos de codigo relevantes
 
 Estructura HTML de la caja fuerte:
 
@@ -653,9 +654,113 @@ body.locked-screen nav {
 
 `body.locked-screen` impide seguir desplazandose por la pagina. El filtro sobre `#mainPage` y `nav` desenfoca la web. La clase `is-active` hace visible la pantalla final de cuarentena.
 
-## 9. Funcionalidad Backend
+## 9. Funcionalidad adicional: flecha para volver al panel superior
 
-### 9.1. Descripcion del comportamiento de la funcionalidad backend
+### 9.1. Descripcion por escrito del comportamiento de la funcionalidad adicional
+
+La funcionalidad adicional consiste en una flecha situada en la parte inferior derecha de la pantalla. Su objetivo es permitir que el usuario vuelva rapidamente al panel superior de la pagina sin tener que desplazarse manualmente hacia arriba.
+
+Cuando la pagina termina de cargar, la flecha aparece como un boton circular flotante. Al hacer clic sobre ella, la pagina se desplaza automaticamente hasta el inicio, donde se encuentra el panel principal con el titulo `GUIA DE SUPERVIVENCIA`, el menu de navegacion y la introduccion general.
+
+Esta funcionalidad mejora la navegacion porque la pagina contiene varias secciones largas: personajes, infectados, caja fuerte, contenido desbloqueado, ciudades y compra. Gracias a la flecha, el usuario puede regresar al principio desde cualquier punto de la web.
+
+### 9.2. Explicacion del funcionamiento de la funcionalidad adicional
+
+La funcionalidad se construye con tres partes:
+
+1. En `index.html` se crea un boton con el identificador `scrollTopButton`. Dentro del boton se coloca el simbolo de flecha hacia arriba.
+2. En `style.css` se posiciona el boton de forma fija en la esquina inferior derecha mediante `position: fixed`, `right` y `bottom`. Tambien se le da forma circular, colores, transiciones y estados visuales.
+3. En `script.js` se selecciona el boton con `getElementById()` y se le anade un evento `click`. Cuando el usuario pulsa la flecha, JavaScript ejecuta `window.scrollTo()` para mover la ventana hasta la coordenada superior de la pagina.
+
+El desplazamiento se hace con `behavior: 'smooth'`, por lo que la vuelta al inicio no ocurre de golpe, sino con una animacion suave. Ademas, el codigo tambien asigna `0` a `document.documentElement.scrollTop` y a `document.body.scrollTop` para asegurar compatibilidad con distintos navegadores.
+
+### 9.3. Fragmentos de codigo mas relevantes de la funcionalidad adicional
+
+Fragmento HTML del boton:
+
+```html
+<button class="scroll-top-button" id="scrollTopButton" type="button" aria-label="Volver al inicio" title="Volver arriba">
+  <span aria-hidden="true">&uarr;</span>
+</button>
+```
+
+Este fragmento crea el boton de la flecha. La clase `scroll-top-button` permite aplicarle estilos desde CSS. El identificador `id="scrollTopButton"` permite que JavaScript lo encuentre de forma exacta. El atributo `type="button"` evita que el boton actue como envio de formulario. `aria-label="Volver al inicio"` describe la funcion del boton para lectores de pantalla, mientras que `title="Volver arriba"` muestra una ayuda al pasar el raton. El `span` contiene la flecha hacia arriba (`&uarr;`) y usa `aria-hidden="true"` porque la descripcion accesible ya esta en el boton.
+
+Seleccion del boton en JavaScript:
+
+```js
+const scrollTopButton = document.getElementById('scrollTopButton');
+```
+
+Esta linea busca en el documento HTML el elemento que tiene el identificador `scrollTopButton` y guarda la referencia en una constante. Sin esta referencia, el script no podria anadir el comportamiento de clic a la flecha.
+
+Evento de clic:
+
+```js
+if (scrollTopButton) {
+  scrollTopButton.addEventListener('click', () => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  });
+}
+```
+
+Este es el metodo mas importante de la funcionalidad. Primero se comprueba `if (scrollTopButton)` para evitar errores si el boton no existe en el HTML. Despues, `addEventListener('click', ...)` indica que el codigo interior se ejecutara cuando el usuario pulse la flecha.
+
+La instruccion principal es:
+
+```js
+window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+```
+
+`window.scrollTo()` desplaza la ventana del navegador. `top: 0` significa que el destino vertical es la parte superior de la pagina. `left: 0` evita cualquier desplazamiento horizontal. `behavior: 'smooth'` activa una transicion suave en lugar de un salto instantaneo.
+
+Las dos lineas finales refuerzan la compatibilidad:
+
+```js
+document.documentElement.scrollTop = 0;
+document.body.scrollTop = 0;
+```
+
+Algunos navegadores guardan el desplazamiento de la pagina en `document.documentElement` y otros en `document.body`. Por eso se ponen ambos valores a `0`: asi se garantiza que la web vuelva al panel superior aunque el navegador gestione el scroll de una forma distinta.
+
+Estilo principal de la flecha:
+
+```css
+.scroll-top-button {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  width: 58px;
+  height: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1200;
+}
+```
+
+`position: fixed` hace que la flecha permanezca siempre en la misma posicion de la pantalla aunque el usuario haga scroll. `right: 22px` la separa del borde derecho y `bottom: 22px` la separa del borde inferior. `width` y `height` le dan el mismo tamano para que pueda ser circular. `display: inline-flex`, `align-items: center` y `justify-content: center` centran la flecha dentro del boton. `border-radius: 50%` convierte el boton en un circulo. `z-index: 1200` lo coloca por encima del contenido principal para que no quede tapado por otros elementos.
+
+Estado visible del boton:
+
+```css
+.scroll-top-button.is-ready {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+```
+
+La clase `is-ready` muestra el boton cuando la pagina ya esta preparada. `opacity: 1` lo hace visible, `visibility: visible` permite que se vea en pantalla, `transform` lo coloca en su posicion final y `pointer-events: auto` permite que pueda recibir clics.
+
+## 10. Funcionalidad Backend
+
+### 10.1. Descripcion del comportamiento de la funcionalidad backend
 
 El backend permite registrar, consultar, modificar y eliminar pedidos de compra de The Last of Us. Funciona como una API REST conectada a MongoDB. La pagina de compra (`tlou-backend/public/indexxx.html`) envia los datos del formulario al servidor, y la pagina de pedidos (`tlou-backend/public/pedidos.html`) muestra los pedidos guardados, permite filtrarlos, cambiar su estado o eliminarlos.
 
@@ -670,7 +775,7 @@ La funcionalidad backend hace principalmente lo siguiente:
 7. Devuelve estadisticas generales de los pedidos.
 8. Los pedidos son registrados en pedidos.json
 
-### 9.2. Explicacion del funcionamiento de la funcionalidad backend
+### 10.2. Explicacion del funcionamiento de la funcionalidad backend
 
 El backend esta hecho con Node.js, Express y Mongoose. Express crea el servidor HTTP y define las rutas de la API. Mongoose se encarga de conectar con MongoDB y de definir la estructura que debe tener cada pedido.
 IMPORTANTE, desde el movil/tablet y como te comente anteriomente en clase no se pueden registrar los pedidos, lo comento por aqui ya que me dijistes que no importaba, pero que tenia que tenerlo escrito en la documentación.
@@ -688,7 +793,7 @@ El servidor se inicia en el puerto `3000` si no se indica otro puerto. La conexi
 
 La comunicacion entre frontend y backend se hace con `fetch()`. Por ejemplo, cuando el usuario confirma una compra, el formulario manda una peticion `POST` a `/api/pedidos` con los datos en formato JSON. El servidor valida esos datos y, si son correctos, crea un documento nuevo en MongoDB.
 
-### 9.3. Fragmentos de codigo relevantes de la funcionalidad backend
+### 10.3. Fragmentos de codigo relevantes de la funcionalidad backend
 
 Importacion de dependencias y configuracion inicial:
 
@@ -1021,9 +1126,9 @@ await fetch(`${API}/pedidos/${id}`, { method: 'DELETE' });
 
 La primera peticion cambia el estado de un pedido usando `PATCH`. La segunda elimina un pedido usando `DELETE`. En ambos casos se usa una URL con el `id` del pedido para que el backend sepa sobre que documento debe actuar.
 
-## 10. Responsividad
+## 11. Responsividad
 
-### 10.1. Descripcion del comportamiento de la responsividad
+### 11.1. Descripcion del comportamiento de la responsividad
 
 La responsividad permite que la pagina web se vea correctamente en ordenador, tablet y movil. Su objetivo es mantener la misma apariencia general de la version de escritorio, pero adaptando tamanos, separaciones y proporciones para que el contenido no se corte, no se superponga y no genere desplazamiento horizontal innecesario.
 
@@ -1036,7 +1141,7 @@ En esta pagina la responsividad mantiene la estructura visual principal:
 5. Las tarjetas de ciudades siguen organizadas en cuadricula.
 6. Los textos, margenes, imagenes y paneles reducen su tamano de forma progresiva segun el ancho de pantalla.
 
-### 10.2. Explicacion del funcionamiento de la responsividad
+### 11.2. Explicacion del funcionamiento de la responsividad
 
 La responsividad se consigue principalmente con CSS. Se usan media queries, unidades flexibles y funciones modernas como `clamp()`, `minmax()` y `min()`.
 
@@ -1049,7 +1154,7 @@ En lugar de cambiar completamente la estructura, el CSS mantiene la composicion 
 
 La funcion `clamp(valor-minimo, valor-flexible, valor-maximo)` es clave porque permite que un tamano crezca o disminuya segun el ancho de la pantalla, pero sin pasar de unos limites. Asi se evita que los textos sean demasiado grandes en movil o demasiado pequenos en escritorio.
 
-### 10.3. Fragmentos de codigo relevantes de la responsividad
+### 11.3. Fragmentos de codigo relevantes de la responsividad
 
 Media query principal:
 
