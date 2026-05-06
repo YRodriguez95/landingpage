@@ -1,83 +1,53 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
+const fs = require('fs/promises');
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0';
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/tlou';
 const ROOT = path.join(__dirname, '..');
-
-mongoose.set('bufferCommands', false);
+const DATA_DIR = path.join(__dirname, 'data');
+const DB_FILE = path.join(DATA_DIR, 'pedidos.json');
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(ROOT));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const pedidoSchema = new mongoose.Schema({
-  id: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
-  },
-  nombre: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  email: {
-    type: String,
-    required: true,
-    trim: true,
-    lowercase: true
-  },
-  plataforma: {
-    type: String,
-    required: true
-  },
-  edicion: {
-    type: String,
-    required: true
-  },
-  notas: {
-    type: String,
-    default: null
-  },
-  fecha: {
-    type: Date,
-    default: Date.now
-  },
-  estado: {
-    type: String,
-    enum: ['pendiente', 'completado', 'cancelado'],
-    default: 'pendiente'
-  },
-  updatedAt: Date
-}, {
-  collection: 'pedidos',
-  versionKey: false,
-  toJSON: {
-    transform: (_doc, ret) => {
-      delete ret._id;
-      return ret;
-    }
-  }
-});
-
-const Pedido = mongoose.model('Pedido', pedidoSchema);
-
 function generateId() {
   return 'TLU-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-function cleanPedido(pedido) {
-  const data = typeof pedido.toJSON === 'function' ? pedido.toJSON() : { ...pedido };
-  delete data._id;
-  delete data.__v;
-  return data;
+async function ensureDatabase() {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+
+  try {
+    await fs.access(DB_FILE);
+  } catch {
+    await writeDatabase({
+      canal: 'The Last of Us - Mercado Seguro',
+      version: '1.0',
+      pedidos: []
+    });
+  }
+}
+
+async function readDatabase() {
+  await ensureDatabase();
+  const raw = await fs.readFile(DB_FILE, 'utf8');
+  const database = JSON.parse(raw || '{}');
+
+  return {
+    canal: database.canal || 'The Last of Us - Mercado Seguro',
+    version: database.version || '1.0',
+    pedidos: Array.isArray(database.pedidos) ? database.pedidos : []
+  };
+}
+
+async function writeDatabase(database) {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.writeFile(DB_FILE, JSON.stringify(database, null, 2) + '\n', 'utf8');
 }
 
 function validate(body) {
@@ -106,52 +76,49 @@ function asyncRoute(handler) {
   return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 }
 
-app.use('/api', (req, res, next) => {
-  if (mongoose.connection.readyState !== 1) {
-    return res.status(503).json({
-      error: 'Base de datos no disponible. Inicia MongoDB para usar la API.'
-    });
-  }
+function filterPedidos(pedidos, filters) {
+  return pedidos.filter((pedido) => {
+    if (filters.nombre && !String(pedido.nombre || '').toLowerCase().includes(filters.nombre.toLowerCase())) {
+      return false;
+    }
 
-  next();
-});
+    if (filters.plataforma && pedido.plataforma !== filters.plataforma) {
+      return false;
+    }
+
+    if (filters.edicion && pedido.edicion !== filters.edicion) {
+      return false;
+    }
+
+    if (filters.estado && pedido.estado !== filters.estado) {
+      return false;
+    }
+
+    return true;
+  });
+}
 
 app.get('/', (req, res) => {
-  res.send('API funcionando con MongoDB');
+  res.send('API funcionando con pedidos.json');
 });
 
 app.get('/api/pedidos', asyncRoute(async (req, res) => {
-  const { nombre, plataforma, edicion, estado } = req.query;
-  const query = {};
+  const database = await readDatabase();
+  const pedidos = filterPedidos(database.pedidos, req.query)
+    .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
-  if (nombre) {
-    query.nombre = { $regex: nombre, $options: 'i' };
-  }
-
-  if (plataforma) {
-    query.plataforma = plataforma;
-  }
-
-  if (edicion) {
-    query.edicion = edicion;
-  }
-
-  if (estado) {
-    query.estado = estado;
-  }
-
-  const pedidos = await Pedido.find(query).sort({ fecha: 1 });
-  res.json({ total: pedidos.length, pedidos: pedidos.map(cleanPedido) });
+  res.json({ total: pedidos.length, pedidos });
 }));
 
 app.get('/api/pedidos/:id', asyncRoute(async (req, res) => {
-  const pedido = await Pedido.findOne({ id: req.params.id });
+  const database = await readDatabase();
+  const pedido = database.pedidos.find((item) => item.id === req.params.id);
 
   if (!pedido) {
     return res.status(404).json({ error: 'Pedido no encontrado.' });
   }
 
-  res.json(cleanPedido(pedido));
+  res.json(pedido);
 }));
 
 app.post('/api/pedidos', asyncRoute(async (req, res) => {
@@ -161,20 +128,31 @@ app.post('/api/pedidos', asyncRoute(async (req, res) => {
     return res.status(400).json({ errors });
   }
 
-  const pedido = await Pedido.create({
-    id: generateId(),
+  const database = await readDatabase();
+  let id = generateId();
+
+  while (database.pedidos.some((pedido) => pedido.id === id)) {
+    id = generateId();
+  }
+
+  const pedido = {
+    id,
     nombre: req.body.nombre.trim(),
     email: req.body.email.trim().toLowerCase(),
     plataforma: req.body.plataforma,
     edicion: req.body.edicion,
     notas: req.body.notas?.trim() || null,
+    fecha: new Date().toISOString(),
     estado: 'pendiente'
-  });
+  };
 
-  console.log(`[POST] Pedido creado en MongoDB: ${pedido.id} - ${pedido.nombre}`);
+  database.pedidos.push(pedido);
+  await writeDatabase(database);
+
+  console.log(`[POST] Pedido guardado en pedidos.json: ${pedido.id} - ${pedido.nombre}`);
   res.status(201).json({
     message: 'Pedido registrado correctamente.',
-    pedido: cleanPedido(pedido)
+    pedido
   });
 }));
 
@@ -186,52 +164,52 @@ app.patch('/api/pedidos/:id/estado', asyncRoute(async (req, res) => {
     return res.status(400).json({ error: `Estado invalido. Usa: ${estadosValidos.join(', ')}` });
   }
 
-  const pedido = await Pedido.findOneAndUpdate(
-    { id: req.params.id },
-    { estado, updatedAt: new Date() },
-    { new: true }
-  );
+  const database = await readDatabase();
+  const pedido = database.pedidos.find((item) => item.id === req.params.id);
 
   if (!pedido) {
     return res.status(404).json({ error: 'Pedido no encontrado.' });
   }
 
+  pedido.estado = estado;
+  pedido.updatedAt = new Date().toISOString();
+  await writeDatabase(database);
+
   console.log(`[PATCH] Pedido ${pedido.id} -> estado: ${estado}`);
-  res.json({ message: 'Estado actualizado.', pedido: cleanPedido(pedido) });
+  res.json({ message: 'Estado actualizado.', pedido });
 }));
 
 app.delete('/api/pedidos/:id', asyncRoute(async (req, res) => {
-  const eliminado = await Pedido.findOneAndDelete({ id: req.params.id });
+  const database = await readDatabase();
+  const pedidoIndex = database.pedidos.findIndex((item) => item.id === req.params.id);
 
-  if (!eliminado) {
+  if (pedidoIndex === -1) {
     return res.status(404).json({ error: 'Pedido no encontrado.' });
   }
 
-  console.log(`[DELETE] Pedido eliminado: ${eliminado.id}`);
+  const [pedido] = database.pedidos.splice(pedidoIndex, 1);
+  await writeDatabase(database);
+
+  console.log(`[DELETE] Pedido eliminado de pedidos.json: ${pedido.id}`);
   res.json({
-    message: `Pedido ${eliminado.id} eliminado.`,
-    pedido: cleanPedido(eliminado)
+    message: `Pedido ${pedido.id} eliminado.`,
+    pedido
   });
 }));
 
 app.get('/api/db', asyncRoute(async (req, res) => {
-  const pedidos = await Pedido.find().sort({ fecha: 1 });
-
-  res.json({
-    canal: 'The Last of Us - Mercado Seguro',
-    version: 'mongo',
-    pedidos: pedidos.map(cleanPedido)
-  });
+  const database = await readDatabase();
+  res.json(database);
 }));
 
 app.get('/api/stats', asyncRoute(async (req, res) => {
-  const pedidos = await Pedido.find();
+  const { pedidos } = await readDatabase();
 
   res.json({
     total: pedidos.length,
-    pendientes: pedidos.filter(p => p.estado === 'pendiente').length,
-    completados: pedidos.filter(p => p.estado === 'completado').length,
-    cancelados: pedidos.filter(p => p.estado === 'cancelado').length,
+    pendientes: pedidos.filter((p) => p.estado === 'pendiente').length,
+    completados: pedidos.filter((p) => p.estado === 'completado').length,
+    cancelados: pedidos.filter((p) => p.estado === 'cancelado').length,
     porPlataforma: pedidos.reduce((acc, p) => {
       acc[p.plataforma] = (acc[p.plataforma] || 0) + 1;
       return acc;
@@ -249,10 +227,13 @@ app.use((err, req, res, next) => {
 });
 
 async function start() {
+  await ensureDatabase();
+
   app.listen(PORT, HOST, () => {
     console.log(`\nTLOU Backend corriendo en http://localhost:${PORT}`);
     console.log(`Red local habilitada en http://TU-IP-LOCAL:${PORT}`);
-    console.log(`Landing disponible en http://localhost:${PORT}/index.html\n`);
+    console.log(`Landing disponible en http://localhost:${PORT}/index.html`);
+    console.log(`Pedidos guardandose en ${DB_FILE}\n`);
     console.log('Rutas disponibles:');
     console.log('  GET    /api/pedidos              - listar pedidos');
     console.log('  GET    /api/pedidos?nombre=Joel  - filtrar');
@@ -261,21 +242,8 @@ async function start() {
     console.log('  PATCH  /api/pedidos/:id/estado   - cambiar estado');
     console.log('  DELETE /api/pedidos/:id          - eliminar');
     console.log('  GET    /api/stats                - estadisticas');
-    console.log('  GET    /api/db                   - exportar JSON desde MongoDB\n');
+    console.log('  GET    /api/db                   - exportar JSON\n');
   });
-
-  try {
-    await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000
-    });
-
-    console.log(`MongoDB conectado: ${mongoose.connection.host}/${mongoose.connection.name}\n`);
-  } catch (err) {
-    console.error('MongoDB no esta disponible.');
-    console.error(`URI usada: ${MONGODB_URI}`);
-    console.error(`${err.message}\n`);
-    console.error('La landing se puede visualizar igualmente, pero la API devolvera 503 hasta iniciar MongoDB.\n');
-  }
 }
 
 start().catch((err) => {

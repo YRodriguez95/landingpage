@@ -7,6 +7,16 @@ const ctx = canvas.getContext('2d');
 
 let W, H, spores = [], filaments = [], dustParticles = [];
 
+function revealLoaderType() {
+  document.body.classList.add('loader-type-ready');
+}
+
+if (document.fonts && document.fonts.load) {
+  document.fonts.load('1em "Special Elite"').then(revealLoaderType, revealLoaderType);
+} else {
+  revealLoaderType();
+}
+
 function resize() {
   W = canvas.width  = window.innerWidth;
   H = canvas.height = window.innerHeight;

@@ -1,11 +1,10 @@
 # TLOU Backend - The Last of Us Supply Channel
 
-Backend con Node.js, Express y MongoDB para registrar pedidos desde el formulario.
+Backend con Node.js y Express para registrar pedidos en `data/pedidos.json`.
 
 ## Requisitos
 
 - Node.js
-- MongoDB local o MongoDB Atlas
 
 ## Instalacion
 
@@ -13,19 +12,12 @@ Backend con Node.js, Express y MongoDB para registrar pedidos desde el formulari
 npm install
 ```
 
-## Configurar MongoDB
+## Datos
 
-Por defecto usa una base de datos local:
+Los pedidos se guardan en:
 
 ```txt
-mongodb://127.0.0.1:27017/tlou
-```
-
-Si quieres usar MongoDB Atlas u otra base de datos, arranca el servidor con `MONGODB_URI`:
-
-```bash
-$env:MONGODB_URI="mongodb+srv://USUARIO:PASSWORD@CLUSTER.mongodb.net/tlou"
-npm start
+tlou-backend/data/pedidos.json
 ```
 
 ## Arrancar el servidor
@@ -49,11 +41,11 @@ http://localhost:3000/tlou-backend/public/indexxx.html
 | GET | `/api/pedidos?plataforma=PlayStation 5` | Filtrar por plataforma |
 | GET | `/api/pedidos?estado=pendiente` | Filtrar por estado |
 | GET | `/api/pedidos/:id` | Obtener un pedido por ID |
-| POST | `/api/pedidos` | Crear nuevo pedido en MongoDB |
+| POST | `/api/pedidos` | Crear nuevo pedido en `pedidos.json` |
 | PATCH | `/api/pedidos/:id/estado` | Cambiar estado del pedido |
 | DELETE | `/api/pedidos/:id` | Eliminar un pedido |
 | GET | `/api/stats` | Estadisticas generales |
-| GET | `/api/db` | Exportar pedidos desde MongoDB como JSON |
+| GET | `/api/db` | Exportar el archivo JSON completo |
 
 ## Ejemplo POST
 

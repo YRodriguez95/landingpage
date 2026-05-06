@@ -148,7 +148,7 @@
         : pedidos;
 
       document.getElementById('badge').textContent = allPedidos.length + ' de ' + total + ' pedido' + (total===1?'':'s');
-      document.getElementById('statusText').textContent = 'CONECTADO A API - LEYENDO MongoDB';
+      document.getElementById('statusText').textContent = 'CONECTADO A API - LEYENDO pedidos.json';
       render();
     } catch(e) {
       document.getElementById('ordersList').innerHTML = `<div class="empty-state">No se puede conectar con el servidor<p>Ejecuta: npm start</p></div>`;
@@ -200,10 +200,10 @@
   }
 
   async function eliminar(id) {
-    if (!confirm(`Eliminar el pedido ${id} de MongoDB?`)) return;
+    if (!confirm(`Eliminar el pedido ${id} de pedidos.json?`)) return;
     try {
       await fetch(`${API}/pedidos/${id}`, { method: 'DELETE' });
-      showToast(`Pedido ${id} eliminado de MongoDB`);
+      showToast(`Pedido ${id} eliminado de pedidos.json`);
       load();
     } catch(e) { showToast('Error al eliminar'); }
   }

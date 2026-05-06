@@ -101,6 +101,14 @@ body {
   text-transform: uppercase;
   text-shadow: 0 0 30px #4a7c5966, 0 2px 0 #00000088;
   line-height: 1.1;
+  min-height: calc(clamp(28px, 5vw, 52px) * 1.6);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease;
+}
+body.loader-type-ready .loader-title {
+  opacity: 1;
+  visibility: visible;
 }
 .loader-title span {
   display: block;
