@@ -157,9 +157,9 @@
     <nav>
       <div class="nav-logo">The last of us</div>
       <ul class="nav-links">
-        <li><a href="#personajes">Personajes</a></li>
-        <li><a href="#zombies">Infectados</a></li>
-        <li><a href="#safeLock">Zonas</a></li>
+        <li><a href="#personajes" data-scroll-target="personajes">Personajes</a></li>
+        <li><a href="#zombies" data-scroll-target="zombies" onclick="scrollToSection(event, 'zombies')">Infectados</a></li>
+        <li><a href="#safeLock" data-scroll-target="safeLock" onclick="scrollToSection(event, 'safeLock')">Zonas</a></li>
       </ul>
     </nav>
      <div class="main-title">GUIA DE SUPERVIVENCIA</div>
@@ -197,7 +197,7 @@
     <div class="main-divider"></div>
       <div class="character-grid">
 
-        <div class="character-card">
+        <div class="character-card" id="joelMiller">
           <div class="img-wrapper" data-wrapper="joel">
             <img src="JoelMiller.png" alt="Joel Miller" class="img-base">
             <div class="zombie-mask" data-mask="joel">

@@ -487,9 +487,14 @@ nav {
 }
 
 #personajes,
+#joelMiller,
 #zombies,
 #safeLock {
-  scroll-margin-top: 118px;
+  scroll-margin-top: 132px;
+}
+
+.nav-links a {
+  touch-action: manipulation;
 }
 
 /* ══════════════════════════════════════════
